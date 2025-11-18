@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Cabeçalho -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+    <div>
+      <h1 class="h3 mb-1 text-white">
+        <i class="bi bi-collection-play me-1"></i>
+        Animes cadastrados
+      </h1>
+      <p class="text-secondary mb-0">
+        Listagem em cards, carregando os dados direto do banco.
+      </p>
+    </div>
+    <div class="text-md-end">
+      {% if request.user.is_authenticated %}
+        <span class="badge bg-success">
+          Logado como: {{ request.user.username }}
+        </span>
+      {% else %}
+        <span class="badge bg-secondary">
+          Visitante
+        </span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Se não tiver nenhum anime -->
+  {% if not animes %}
+    <div class="alert alert-warning border-0">
+      Nenhum anime cadastrado ainda.  
+      <span class="text-muted small d-block">
+        Assim que você criar alguns registros no admin, eles vão aparecer aqui.
+      </span>
+    </div>
+  {% endif %}
+
+  <!-- Grid de cards (BANCO) -->
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4">
+    {% for anime in animes %}
+      <div class="col">
+        <div class="card card-anime h-100">
+          {% if anime.imagem_url %}
+            <img src="{{ anime.imagem_url }}" class="card-img-top card-anime-img" alt="{{ anime.titulo }}">
+          {% else %}
+            <div class="bg-secondary d-flex align-items-center justify-content-center card-anime-img">
+              <span class="text-white-50 small">Sem imagem</span>
+            </div>
+          {% endif %}
+
+          <div class="card-body d-flex flex-column">
+            <!-- Título -->
+            <h5 class="card-title mb-1 text-white">
+              {{ anime.titulo }}
+            </h5>
+            {% if anime.titulo_ingles %}
+              <p class="card-subtitle mb-2 text-secondary small">
+                {{ anime.titulo_ingles }}
+              </p>
+            {% endif %}
+
+            <!-- Badges -->
+            <div class="mb-2">
+              <span class="badge badge-outline rounded-pill me-1">
+                {{ anime.get_tipo_display }}
+              </span>
+              <span class="badge badge-outline rounded-pill me-1">
+                {{ anime.get_status_display }}
+              </span>
+              {% if anime.temporada %}
+                <span class="badge bg-info rounded-pill">
+                  {{ anime.temporada.get_estacao_display }} {{ anime.temporada.ano }}
+                </span>
+              {% endif %}
+            </div>
+
+            <!-- Sinopse -->
+            {% if anime.sinopse %}
+              <p class="card-text text-secondary small mb-2">
+                {{ anime.sinopse|truncatechars:180 }}
+              </p>
+            {% endif %}
+
+            <!-- Gêneros -->
+            <div class="mb-2">
+              <small class="text-secondary d-block mb-1">Gêneros:</small>
+              {% if anime.generos.exists %}
+                {% for g in anime.generos.all %}
+                  <span class="badge bg-secondary me-1 mb-1">{{ g.nome }}</span>
+                {% endfor %}
+              {% else %}
+                <span class="text-secondary small">Nenhum gênero cadastrado</span>
+              {% endif %}
+            </div>
+
+            <!-- Nota e popularidade -->
+            <div class="mt-auto pt-2 border-top border-secondary-subtle">
+              <div class="d-flex justify-content-between small text-secondary">
+                <span>
+                  <i class="bi bi-star-fill text-warning me-1"></i>
+                  Nota MAL:
+                  <strong class="text-light">
+                    {{ anime.nota_mal|default:"-" }}
+                  </strong>
+                </span>
+                <span>
+                  <i class="bi bi-graph-up-arrow me-1"></i>
+                  Pop:
+                  <strong class="text-light">
+                    {{ anime.popularidade_score }}
+                  </strong>
+                </span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+
+  <!-- ============================================= -->
+  <!-- Animes da MyAnimeList (via Jikan API)        -->
+  <!-- ============================================= -->
+  <hr class="my-5">
+
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+    <div>
+      <h2 class="h4 mb-1 text-white">
+        <i class="bi bi-cloud-arrow-down me-1"></i>
+        Animes da temporada atual (MyAnimeList)
+      </h2>
+      <p class="text-secondary mb-0 small">
+        Dados carregados ao vivo da Jikan API: <code>/v4/seasons/now</code>
+      </p>
+    </div>
+  </div>
+
+  {% if animes_mal %}
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4">
+      {% for anime in animes_mal %}
+        <div class="col">
+          <div class="card card-anime h-100">
+            {% if anime.imagem_url %}
+              <img src="{{ anime.imagem_url }}" class="card-img-top card-anime-img" alt="{{ anime.titulo }}">
+            {% else %}
+              <div class="bg-secondary d-flex align-items-center justify-content-center card-anime-img">
+                <span class="text-white-50 small">Sem imagem</span>
+              </div>
+            {% endif %}
+
+            <div class="card-body d-flex flex-column">
+              <!-- Título -->
+              <h5 class="card-title mb-1 text-white">
+                {{ anime.titulo }}
+              </h5>
+              {% if anime.titulo_ingles %}
+                <p class="card-subtitle mb-2 text-secondary small">
+                  {{ anime.titulo_ingles }}
+                </p>
+              {% endif %}
+
+              <!-- Season / Ano / Episódios -->
+              <div class="mb-2">
+                {% if anime.season or anime.year %}
+                  <span class="badge badge-outline rounded-pill me-1">
+                    {{ anime.season|default:"?" }} {{ anime.year|default:"" }}
+                  </span>
+                {% endif %}
+                {% if anime.episodios %}
+                  <span class="badge badge-outline rounded-pill me-1">
+                    {{ anime.episodios }} eps
+                  </span>
+                {% endif %}
+              </div>
+
+              <!-- Sinopse -->
+              {% if anime.sinopse %}
+                <p class="card-text text-secondary small mb-2">
+                  {{ anime.sinopse|truncatechars:180 }}
+                </p>
+              {% endif %}
+
+              <!-- Nota -->
+              <div class="mt-auto pt-2 border-top border-secondary-subtle">
+                <div class="d-flex justify-content-between small text-secondary">
+                  <span>
+                    <i class="bi bi-star-fill text-warning me-1"></i>
+                    Nota MAL:
+                    <strong class="text-light">
+                      {{ anime.nota_mal|default:"-" }}
+                    </strong>
+                  </span>
+                  <span class="text-secondary small">
+                    Via MyAnimeList
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-danger border-0">
+      Não foi possível carregar os animes da MyAnimeList ainda.
+      <span class="d-block small text-muted">
+        Verifique o console do servidor (terminal) para ver se houve erro na chamada da Jikan API.
+      </span>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

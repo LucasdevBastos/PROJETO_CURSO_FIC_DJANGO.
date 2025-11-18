@@ -1,0 +1,397 @@
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Cabeçalho / Hero -->
+  <div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+      <h1 class="mb-1 fw-bold">Painel de Testes – Anime Calendar</h1>
+      <p class="text-muted mb-0">
+        Visualize os dados do banco e teste a integração com a API do MyAnimeList (via Jikan).
+      </p>
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+      <span class="badge rounded-pill bg-primary px-3 py-2">
+        Django + Bootstrap + Jikan API
+      </span>
+    </div>
+  </div>
+
+  <!-- Info do usuário -->
+  <div class="alert alert-info d-flex justify-content-between align-items-center">
+    <div>
+      <strong>Usuário logado:</strong>
+      {% if request.user.is_authenticated %}
+        {{ request.user.username }}
+      {% else %}
+        Nenhum usuário logado.
+      {% endif %}
+    </div>
+    <div>
+      {% if request.user.is_authenticated %}
+        <span class="badge bg-success">Autenticado</span>
+      {% else %}
+        <span class="badge bg-secondary">Visitante</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Abas para organizar visualização -->
+  <ul class="nav nav-pills mb-4" id="painelTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="tab-db" data-bs-toggle="pill"
+              data-bs-target="#conteudo-db" type="button" role="tab">
+        Dados do Banco (Django)
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="tab-api" data-bs-toggle="pill"
+              data-bs-target="#conteudo-api" type="button" role="tab">
+        Dados da API (Jikan)
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+
+    <!-- ================= DADOS DO BANCO ================= -->
+    <div class="tab-pane fade show active" id="conteudo-db" role="tabpanel" aria-labelledby="tab-db">
+
+      <!-- Temporadas -->
+      <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h4 mb-0">
+            <i class="bi bi-calendar-week me-1"></i>
+            Temporadas <small class="text-muted">(contexto: <code>temporadas</code>)</small>
+          </h2>
+        </div>
+
+        {% if temporadas %}
+          <div class="row row-cols-1 row-cols-md-3 g-3">
+            {% for t in temporadas %}
+              <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                  <div class="card-body">
+                    <h5 class="card-title mb-1">
+                      {{ t.get_estacao_display }} {{ t.ano }}
+                      {% if t.is_atual %}
+                        <span class="badge bg-success ms-1">Atual</span>
+                      {% endif %}
+                    </h5>
+                    <p class="card-text mb-2 small text-muted">
+                      <strong>Início:</strong> {{ t.data_inicio|date:"d/m/Y" }}<br>
+                      <strong>Fim:</strong> {{ t.data_fim|date:"d/m/Y" }}
+                    </p>
+                    <p class="card-text mb-0">
+                      <small class="text-muted">
+                        Animes nesta temporada: {{ t.animes.count }}
+                      </small>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted">Nenhuma temporada encontrada.</p>
+        {% endif %}
+      </section>
+
+      <hr>
+
+      <!-- Lista de Animes (BD) -->
+      <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h4 mb-0">
+            <i class="bi bi-collection-play me-1"></i>
+            Animes no Banco <small class="text-muted">(contexto: <code>animes</code>)</small>
+          </h2>
+        </div>
+
+        {% if animes %}
+          <div class="row row-cols-1 row-cols-md-3 g-3">
+            {% for anime in animes %}
+              <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                  {% if anime.imagem_url %}
+                    <img src="{{ anime.imagem_url }}" class="card-img-top" alt="{{ anime.titulo }}">
+                  {% endif %}
+                  <div class="card-body d-flex flex-column">
+                    <h5 class="card-title mb-1">{{ anime.titulo }}</h5>
+                    {% if anime.titulo_ingles %}
+                      <h6 class="card-subtitle mb-2 text-muted">{{ anime.titulo_ingles }}</h6>
+                    {% endif %}
+
+                    <p class="card-text small text-muted mb-2">
+                      Tipo: {{ anime.get_tipo_display }}<br>
+                      Status: {{ anime.get_status_display }}<br>
+                      Temporada:
+                      {% if anime.temporada %}
+                        {{ anime.temporada.get_estacao_display }} {{ anime.temporada.ano }}
+                      {% else %}
+                        -
+                      {% endif %}
+                    </p>
+
+                    {% if anime.sinopse %}
+                      <p class="card-text small">
+                        {{ anime.sinopse|truncatechars:150 }}
+                      </p>
+                    {% endif %}
+
+                    <p class="card-text mt-auto mb-0">
+                      <small class="text-muted">
+                        Nota MAL: {{ anime.nota_mal|default:"-" }}<br>
+                        Popularidade: {{ anime.popularidade_score }}
+                      </small>
+                    </p>
+                  </div>
+                  <div class="card-footer bg-white border-0 pt-0">
+                    <small class="text-muted">Gêneros:</small><br>
+                    {% if anime.generos.exists %}
+                      {% for g in anime.generos.all %}
+                        <span class="badge bg-secondary mb-1">{{ g.nome }}</span>
+                      {% endfor %}
+                    {% else %}
+                      <span class="text-muted small">Nenhum gênero</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted">Nenhum anime encontrado.</p>
+        {% endif %}
+      </section>
+
+      <hr>
+
+      <!-- Próximas exibições -->
+      <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h4 mb-0">
+            <i class="bi bi-clock-history me-1"></i>
+            Próximas exibições <small class="text-muted">(contexto: <code>airings</code>)</small>
+          </h2>
+        </div>
+
+        {% if airings %}
+          <div class="table-responsive">
+            <table class="table table-sm table-striped align-middle shadow-sm">
+              <thead class="table-dark">
+                <tr>
+                  <th>Anime</th>
+                  <th>Episódio</th>
+                  <th>Data</th>
+                  <th>Hora</th>
+                  <th>Timezone</th>
+                  <th>Obs.</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for a in airings %}
+                  <tr>
+                    <td>{{ a.anime.titulo }}</td>
+                    <td>
+                      {% if a.episodio %}
+                        {{ a.episodio }}
+                      {% else %}
+                        -
+                      {% endif %}
+                    </td>
+                    <td>{{ a.data_exibicao|date:"d/m/Y" }}</td>
+                    <td>
+                      {% if a.hora_exibicao %}
+                        {{ a.hora_exibicao|time:"H:i" }}
+                      {% else %}
+                        -
+                      {% endif %}
+                    </td>
+                    <td>{{ a.timezone|default:"-" }}</td>
+                    <td>{{ a.observacao|default:"-" }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted">Nenhuma exibição cadastrada.</p>
+        {% endif %}
+      </section>
+
+      <hr>
+
+      <!-- Comentários recentes -->
+      <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h4 mb-0">
+            <i class="bi bi-chat-dots me-1"></i>
+            Comentários recentes <small class="text-muted">(contexto: <code>comentarios</code>)</small>
+          </h2>
+        </div>
+
+        {% if comentarios %}
+          <div class="list-group shadow-sm">
+            {% for c in comentarios %}
+              <div class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                  <h5 class="mb-1">{{ c.user.username }} em {{ c.anime.titulo }}</h5>
+                  <small class="text-muted">
+                    {{ c.created_at|date:"d/m/Y H:i" }}
+                    {% if c.is_editado %}(editado){% endif %}
+                  </small>
+                </div>
+                {% if c.parent %}
+                  <p class="mb-1">
+                    <span class="badge bg-light text-dark">Resposta de outro comentário</span>
+                  </p>
+                {% endif %}
+                <p class="mb-1">{{ c.texto }}</p>
+                <small class="text-muted">
+                  Likes: {{ c.likes.count }} |
+                  Reports: {{ c.reports.count }}
+                </small>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted">Nenhum comentário encontrado.</p>
+        {% endif %}
+      </section>
+
+      <hr>
+
+      <!-- Formulário de teste para criar comentário (fake) -->
+      <section class="mb-5">
+        <h2 class="h4 mb-3">
+          <i class="bi bi-pencil-square me-1"></i>
+          Formulário de teste (HTML puro)
+        </h2>
+        <p class="text-muted">
+          Esse formulário é só HTML pra você testar CSRF e POST.  
+          Depois você aponta o <code>action</code> para a view de criar comentário.
+        </p>
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <form method="post" action="">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="anime_id" class="form-label">ID do Anime</label>
+                <input type="number" class="form-control" id="anime_id" name="anime_id" placeholder="Ex: 1">
+              </div>
+              <div class="mb-3">
+                <label for="texto" class="form-label">Comentário</label>
+                <textarea class="form-control" id="texto" name="texto" rows="3"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                Enviar teste
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+    </div> <!-- fim tab DB -->
+
+    <!-- ================= DADOS DA API (JIKAN) ================= -->
+    <div class="tab-pane fade" id="conteudo-api" role="tabpanel" aria-labelledby="tab-api">
+
+      <section class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h2 class="h4 mb-0">
+            <i class="bi bi-cloud-arrow-down me-1"></i>
+            Temporada atual via API (Jikan)
+          </h2>
+          <button id="btn-load-api" class="btn btn-outline-primary btn-sm">
+            Carregar animes da API
+          </button>
+        </div>
+        <p class="text-muted small mb-2">
+          Endpoint: <code>https://api.jikan.moe/v4/seasons/now</code>  
+          (Anime + MyAnimeList, sem precisar de autenticação).
+        </p>
+        <div id="api-status" class="small text-muted mb-3"></div>
+
+        <div class="row row-cols-1 row-cols-md-3 g-3" id="api-animes-container">
+          <!-- Cards da API serão inseridos aqui via JavaScript -->
+        </div>
+      </section>
+
+    </div> <!-- fim tab API -->
+
+  </div> <!-- tab-content -->
+</div>
+
+<!-- Script para consumir a Jikan API e montar cards Bootstrap -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const btn = document.getElementById("btn-load-api");
+  const statusEl = document.getElementById("api-status");
+  const container = document.getElementById("api-animes-container");
+
+  if (!btn) return;
+
+  btn.addEventListener("click", async function () {
+    statusEl.textContent = "Carregando dados da API...";
+    container.innerHTML = "";
+
+    try {
+      const response = await fetch("https://api.jikan.moe/v4/seasons/now");
+      if (!response.ok) {
+        throw new Error("Erro ao chamar API: " + response.status);
+      }
+
+      const json = await response.json();
+      const animes = json.data || [];
+
+      if (!animes.length) {
+        statusEl.textContent = "Nenhum anime retornado pela API.";
+        return;
+      }
+
+      statusEl.textContent = `Carregados ${animes.length} animes da API. Mostrando os primeiros 12.`;
+
+      animes.slice(0, 12).forEach(item => {
+        const images = item.images && item.images.jpg ? item.images.jpg : null;
+        const imageUrl = images ? images.image_url : "";
+        const title = item.title || "Sem título";
+        const titleEn = item.title_english || "";
+        const synopsis = item.synopsis || "Sem sinopse disponível.";
+        const score = (item.score !== null && item.score !== undefined) ? item.score : "-";
+        const episodes = (item.episodes !== null && item.episodes !== undefined) ? item.episodes : "-";
+        const season = item.season || "-";
+        const year = item.year || "-";
+
+        const col = document.createElement("div");
+        col.className = "col";
+
+        col.innerHTML = `
+          <div class="card h-100 shadow-sm border-0">
+            ${imageUrl ? `<img src="${imageUrl}" class="card-img-top" alt="${title}">` : ""}
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title mb-1">${title}</h5>
+              ${titleEn ? `<h6 class="card-subtitle mb-2 text-muted">${titleEn}</h6>` : ""}
+              <p class="card-text small text-muted mb-2">
+                Temporada: ${season} ${year}<br>
+                Episódios: ${episodes} | Nota: ${score}
+              </p>
+              <p class="card-text small">
+                ${synopsis.length > 220 ? synopsis.substring(0, 220) + "..." : synopsis}
+              </p>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(col);
+      });
+
+    } catch (err) {
+      console.error(err);
+      statusEl.textContent = "Erro ao buscar dados da API. Veja o console para mais detalhes.";
+    }
+  });
+});
+</script>
+{% endblock %}
