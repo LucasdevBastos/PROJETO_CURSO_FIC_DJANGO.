@@ -1,8 +1,9 @@
-# comments/urls.py
 from django.urls import path
+from . import views
 
-app_name = "comments"
+app_name = "calendar_app"
 
 urlpatterns = [
-    # vazio por enquanto, só pra não quebrar
+    path("", views.month_view, name="month_current"),
+    path("<int:year>/<int:month>/", views.month_view, name="month_by_date"),
 ]

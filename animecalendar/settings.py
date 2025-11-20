@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "calendar_app",
     "comments",
     "core",
+    "animecalendar", 
     
 
     
@@ -63,18 +64,19 @@ ROOT_URLCONF = "animecalendar.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        "DIRS": [BASE_DIR / "templates"],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],  # sem DIRS, só app/templates
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
+
 
 WSGI_APPLICATION = "animecalendar.wsgi.application"
 
@@ -130,3 +132,9 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+LOGIN_REDIRECT_URL = "/animes/lista/"      # para onde vai depois do login
+LOGOUT_REDIRECT_URL = "landing"           # opcional, já usamos no LogoutView
+LOGIN_URL = "users:login"                 # se precisar de @login_required
+

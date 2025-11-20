@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Cabeçalho -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+    <div>
+      <h1 class="h3 mb-1 text-white">
+        <i class="bi bi-calendar-week me-2"></i>
+        Calendário de Exibições
+      </h1>
+      <p class="text-secondary mb-0">
+        {{ month_name }} de {{ year }}
+      </p>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a href="{% url 'calendar_app:month_by_date' prev_year prev_month %}" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-chevron-left"></i> Mês anterior
+      </a>
+      <a href="{% url 'calendar_app:month_by_date' next_year next_month %}" class="btn btn-outline-light btn-sm">
+        Próximo mês <i class="bi bi-chevron-right"></i>
+      </a>
+      <a href="{% url 'calendar_app:month_current' %}" class="btn btn-primary btn-sm">
+        Hoje
+      </a>
+    </div>
+  </div>
+
+  <!-- Legenda -->
+  <div class="mb-3 small text-secondary">
+    <span class="me-3">
+      <span class="d-inline-block rounded-2 me-1" style="width:14px;height:14px;background:#0f172a;border:1px solid #38bdf8;"></span>
+      Hoje
+    </span>
+    <span class="me-3">
+      <span class="d-inline-block rounded-2 me-1" style="width:14px;height:14px;background:#020617;"></span>
+      Dia com exibições
+    </span>
+    <span>
+      <span class="d-inline-block rounded-2 me-1" style="width:14px;height:14px;background:#020617;opacity:.35;"></span>
+      Fora do mês
+    </span>
+  </div>
+
+  <!-- Calendário -->
+  <div class="table-responsive shadow-lg rounded-3 overflow-hidden">
+    <table class="table table-dark table-bordered mb-0 align-middle text-center" style="background:#020617;">
+      <thead class="table-dark">
+        <tr>
+          <th class="small text-uppercase">Seg</th>
+          <th class="small text-uppercase">Ter</th>
+          <th class="small text-uppercase">Qua</th>
+          <th class="small text-uppercase">Qui</th>
+          <th class="small text-uppercase">Sex</th>
+          <th class="small text-uppercase">Sáb</th>
+          <th class="small text-uppercase">Dom</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for week in weeks %}
+          <tr>
+            {% for day in week %}
+              {# classes de estilo por condição #}
+              {% if day.in_month %}
+                {% if day.is_today %}
+                  {% set cell_bg = "#020617" %}
+                  {% set border_style = "border-color:#38bdf8;" %}
+                {% else %}
+                  {% set cell_bg = "#020617" %}
+                  {% set border_style = "border-color:rgba(148,163,184,.3);" %}
+                {% endif %}
+              {% else %}
+                {% set cell_bg = "#020617" %}
+                {% set border_style = "border-color:rgba(148,163,184,.15);opacity:.35;" %}
+              {% endif %}
+
+              <td style="background: {{ cell_bg }}; {{ border_style }}; min-width: 140px; vertical-align: top;">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="small text-secondary">
+                    {{ day.date|date:"d" }}
+                  </span>
+                  {% if day.is_today %}
+                    <span class="badge bg-info text-dark">Hoje</span>
+                  {% endif %}
+                </div>
+
+                {% if day.airings %}
+                  <div class="d-flex flex-column gap-1 text-start">
+                    {% for airing in day.airings|slice:":3" %}
+                      <div class="small p-1 rounded-2" style="background:rgba(148,163,184,.08);">
+                        <div class="text-truncate text-light">
+                          {{ airing.anime.titulo }}
+                        </div>
+                        <div class="text-secondary">
+                          {% if airing.hora_exibicao %}
+                            {{ airing.hora_exibicao|time:"H:i" }}
+                          {% else %}
+                            Horário não informado
+                          {% endif %}
+                        </div>
+                      </div>
+                    {% endfor %}
+
+                    {% if day.airings|length > 3 %}
+                      <div class="small text-secondary">
+                        + {{ day.airings|length|add:"-3" }} outros...
+                      </div>
+                    {% endif %}
+                  </div>
+                {% else %}
+                  <div class="small text-secondary-50 mt-2">
+                    <span class="text-secondary" style="opacity:.45;">Sem exibições</span>
+                  </div>
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}
