@@ -1,0 +1,69 @@
+{% load static %}
+
+<div id="favoritos-tab-content" class="tab-content" style="display: none;">
+    {% if favoritos %}
+        <div class="anime-grid">
+            {% for anime in favoritos %}
+            <a href="{% url 'core:anime_detail' anime.mal_id %}" style="text-decoration: none; color: inherit;">
+                <article class="anilumi-card">
+                    <div class="card-media">
+                        {% if anime.nota_mal %}
+                            <div class="score-badge">★ {{ anime.nota_mal }}</div>
+                        {% endif %}
+                        
+                        {% if anime.imagem_url %}
+                            <img src="{{ anime.imagem_url }}" alt="{{ anime.titulo }}" loading="lazy">
+                        {% else %}
+                            <div class="no-image">
+                                <i class="bi bi-image"></i>
+                            </div>
+                        {% endif %}
+
+                        <div class="media-overlay">
+                            <button class="btn-icon"><i class="bi bi-heart-fill text-accent"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="card-content">
+                        <div class="card-header-text">
+                            <h3 title="{{ anime.titulo }}">{{ anime.titulo|truncatechars:25 }}</h3>
+                            {% if anime.titulo_ingles %}
+                                <small>{{ anime.titulo_ingles|truncatechars:30 }}</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="card-tags">
+                            <span class="tag tag-outline">{{ anime.get_tipo_display }}</span>
+                            <span class="tag tag-outline">{{ anime.get_status_display }}</span>
+                            {% if anime.temporada %}
+                                <span class="tag tag-filled">{{ anime.temporada.get_estacao_display }} {{ anime.temporada.ano }}</span>
+                            {% endif %}
+                        </div>
+
+                        {% if anime.sinopse %}
+                            <p class="card-synopsis">{{ anime.sinopse|striptags|truncatechars:120 }}</p>
+                        {% endif %}
+
+                        <div class="card-footer">
+                            <div class="footer-stat">
+                                <i class="bi bi-star-fill text-warning"></i> 
+                                <span>{{ anime.nota_mal|default:"-" }}</span>
+                            </div>
+                            <div class="footer-stat">
+                                <i class="bi bi-heart-fill text-accent"></i>
+                                <span>Favorito</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state-glass">
+            <div class="icon-box"><i class="bi bi-heart"></i></div>
+            <h3>Nenhum favorito ainda</h3>
+            <p>Adicione animes aos seus favoritos para vê-los aqui!</p>
+        </div>
+    {% endif %}
+</div>

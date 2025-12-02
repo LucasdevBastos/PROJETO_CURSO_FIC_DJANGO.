@@ -169,102 +169,205 @@
             </main>
         </div>
 
-        <!-- SEÇÃO DE COMENTÁRIOS -->
+        <!-- SEÇÃO DE COMENTÁRIOS - DESIGN UX PREMIUM -->
         <div class="comments-section mt-5">
             <div class="section-title-bar">
-                <h2><i class="bi bi-chat-dots-fill text-cyan"></i> Comentários <span class="counter-badge">{{ comentarios.count }}</span></h2>
+                <h2><i class="bi bi-chat-dots-fill text-cyan"></i> Comunidade <span class="counter-badge">{{ comentarios_ativos.count }}</span></h2>
+                <p class="section-subtitle">O que você acha deste anime?</p>
             </div>
 
-            <div class="comments-layout">
-                <!-- Coluna Esquerda: Formulário -->
-                <div class="comment-form-col">
+            <div class="comments-container">
+                <!-- COLUNA ESQUERDA: FORMULÁRIO -->
+                <div class="comment-form-section">
                     {% if user.is_authenticated %}
-                        <div class="glass-form-card">
-                            <h4>Deixe sua opinião</h4>
-                            <form method="POST" action="{% url 'comentarios:criar' anime_id %}">
+                        <div class="comment-form-card">
+                            <div class="form-header">
+                                <h3>Deixe sua opinião</h3>
+                                <span class="form-badge">{{ user.username }}</span>
+                            </div>
+                            
+                            <form method="POST" action="{% url 'comentarios:criar' anime_id %}" class="comment-form">
                                 {% csrf_token %}
-                                <div class="custom-input-group">
-                                    {{ form_comentario.as_p }}
+                                
+                                <!-- Textarea com contador -->
+                                <div class="form-group-custom">
+                                    <textarea 
+                                        name="texto" 
+                                        placeholder="O que você achou? Compartilhe seus pensamentos..." 
+                                        maxlength="2000" 
+                                        rows="4" 
+                                        required
+                                        class="form-textarea"
+                                    ></textarea>
+                                    <div class="char-counter">
+                                        <span class="current">0</span> / 2000
+                                    </div>
                                 </div>
-                                <button type="submit" class="btn-neon w-100">
-                                    Enviar Comentário <i class="fas fa-paper-plane"></i>
+
+                                <!-- Rating com Slider -->
+                                <div class="form-group-custom">
+                                    <label class="form-label">Sua nota (opcional)</label>
+                                    <div class="rating-slider-container">
+                                        <input type="range" name="nota" id="nota_input" min="1" max="10" value="" class="rating-slider">
+                                        <div class="slider-labels">
+                                            <span>1</span>
+                                            <span>10</span>
+                                        </div>
+                                    </div>
+                                    <span class="rating-text-slider">Sem nota</span>
+                                </div>
+
+                                <!-- Botão Submit -->
+                                <button type="submit" class="btn-submit-comment">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Enviar Comentário
                                 </button>
                             </form>
                         </div>
                     {% else %}
-                        <div class="login-prompt">
-                            <i class="bi bi-lock-fill"></i>
-                            <p>Faça <a href="{% url 'users:login' %}">login</a> para participar da discussão.</p>
+                        <div class="login-card">
+                            <div class="login-icon">
+                                <i class="bi bi-lock-fill"></i>
+                            </div>
+                            <h3>Faça parte da comunidade</h3>
+                            <p>Entre na sua conta para compartilhar sua opinião</p>
+                            <a href="{% url 'users:login' %}" class="btn-login-redirect">
+                                Fazer Login <i class="bi bi-arrow-right"></i>
+                            </a>
                         </div>
                     {% endif %}
                 </div>
 
-                <!-- Coluna Direita: Lista -->
-                <div class="comment-list-col">
-                    {% if comentarios %}
-                        {% for comentario in comentarios %}
-                            <div class="comment-card">
-                                <div class="comment-header">
-                                    <div class="user-info">
-                                        <div class="avatar">{{ comentario.user.username|make_list|first|upper }}</div>
-                                        <div>
-                                            <a href="{% url 'perfil:ver' comentario.user.username %}" class="username">
-                                                {{ comentario.user.get_full_name|default:comentario.user.username }}
-                                            </a>
-                                            <span class="timestamp">{{ comentario.criado_em|date:"d M Y" }}</span>
-                                        </div>
-                                    </div>
-                                    {% if comentario.nota %}
-                                        <div class="user-score">★ {{ comentario.nota }}</div>
-                                    {% endif %}
-                                </div>
-                                
-                                <div class="comment-body">
-                                    <p>{{ comentario.texto }}</p>
-                                </div>
+                <!-- COLUNA DIREITA: LISTA DE COMENTÁRIOS -->
+                <div class="comments-list-section">
+                    <div class="list-header">
+                        <h3>Comentários</h3>
+                        <span class="list-count">{{ comentarios_ativos.count }}</span>
+                    </div>
 
-                                <!-- Ações do Comentário -->
-                                {% if user.is_authenticated and user == comentario.user %}
-                                    <div class="comment-actions">
-                                        <button class="btn-icon-small" data-bs-toggle="modal" data-bs-target="#editModal{{ comentario.id }}">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <form method="POST" action="{% url 'comentarios:excluir' comentario.id %}" onsubmit="return confirm('Excluir este comentário?');">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn-icon-small danger">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-
-                                    <!-- Modal Edição (Mantendo estrutura Bootstrap para funcionalidade, mas estilizando) -->
-                                    <div class="modal fade" id="editModal{{ comentario.id }}" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content glass-modal">
-                                                <div class="modal-header border-0">
-                                                    <h5 class="modal-title">Editar</h5>
-                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    {% if comentarios_ativos %}
+                        <div class="comments-stack">
+                            {% for comentario in comentarios_ativos %}
+                                <div class="comment-item" data-comment-id="{{ comentario.id }}">
+                                    <!-- Header do Comentário -->
+                                    <div class="comment-item-header">
+                                        <div class="user-profile">
+                                            <div class="user-avatar" title="{{ comentario.user.username }}">
+                                                {{ comentario.user.username|make_list|first|upper }}
+                                            </div>
+                                            <div class="user-details">
+                                                <a href="{% url 'perfil:ver' comentario.user.username %}" class="user-name">
+                                                    {{ comentario.user.get_full_name|default:comentario.user.username }}
+                                                </a>
+                                                <div class="comment-meta">
+                                                    <span class="time-ago" title="{{ comentario.criado_em|date:'Y-m-d H:i' }}">
+                                                        {{ comentario.criado_em|date:"d \d\e M" }}
+                                                    </span>
+                                                    {% if comentario.atualizado_em != comentario.criado_em %}
+                                                        <span class="edited-badge">editado</span>
+                                                    {% endif %}
                                                 </div>
-                                                <form method="POST" action="{% url 'comentarios:editar' comentario.id %}">
-                                                    <div class="modal-body">
-                                                        {% csrf_token %}
-                                                        {{ form_comentario.as_p }}
-                                                    </div>
-                                                    <div class="modal-footer border-0">
-                                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-                                                        <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
-                                                    </div>
-                                                </form>
                                             </div>
                                         </div>
+                                        {% if comentario.nota %}
+                                            <div class="rating-display">
+                                                <div class="stars-display">
+                                                    {% for i in "12345" %}
+                                                        <i class="fas fa-star {% if i <= comentario.nota|stringformat:"d" %}active{% endif %}"></i>
+                                                    {% endfor %}
+                                                </div>
+                                                <span class="rating-number">{{ comentario.nota }}/10</span>
+                                            </div>
+                                        {% endif %}
                                     </div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
+
+                                    <!-- Conteúdo do Comentário -->
+                                    <div class="comment-item-body">
+                                        <p>{{ comentario.texto }}</p>
+                                    </div>
+
+                                    <!-- Ações (apenas para dono) -->
+                                    {% if user.is_authenticated and user == comentario.user %}
+                                        <div class="comment-item-actions">
+                                            <button 
+                                                class="action-btn edit-btn" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#editModal{{ comentario.id }}"
+                                                title="Editar este comentário"
+                                            >
+                                                <i class="fas fa-pen"></i> Editar
+                                            </button>
+                                            <form method="POST" action="{% url 'comentarios:excluir' comentario.id %}" style="display:inline;">
+                                                {% csrf_token %}
+                                                <button 
+                                                    type="submit" 
+                                                    class="action-btn delete-btn"
+                                                    onclick="return confirm('Deseja remover este comentário?')"
+                                                    title="Remover este comentário"
+                                                >
+                                                    <i class="fas fa-trash"></i> Remover
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                        <!-- MODAL DE EDIÇÃO -->
+                                        <div class="modal fade" id="editModal{{ comentario.id }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content edit-modal">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Editar Comentário</h5>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <form method="POST" action="{% url 'comentarios:editar' comentario.id %}">
+                                                        <div class="modal-body">
+                                                            {% csrf_token %}
+                                                            <textarea 
+                                                                name="texto" 
+                                                                maxlength="2000" 
+                                                                rows="5" 
+                                                                class="form-control edit-textarea" 
+                                                                required
+                                                            >{{ comentario.texto }}</textarea>
+                                                            <small class="form-text text-muted d-block mt-2">Máximo 2000 caracteres</small>
+                                                            
+                                                            <div class="form-group mt-3">
+                                                                <label class="form-label">Nota (opcional)</label>
+                                                                <div class="rating-picker-edit">
+                                                                    {% for i in "12345678910" %}
+                                                                        <input 
+                                                                            type="radio" 
+                                                                            name="nota" 
+                                                                            id="nota_{{ comentario.id }}_{{ i }}" 
+                                                                            value="{{ i }}"
+                                                                            {% if comentario.nota|stringformat:"d" == i %}checked{% endif %}
+                                                                            class="rating-radio"
+                                                                        >
+                                                                        <label for="nota_{{ comentario.id }}_{{ i }}" class="star-label" title="{{ i }}/10">
+                                                                            <i class="fas fa-star"></i>
+                                                                        </label>
+                                                                    {% endfor %}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
                     {% else %}
-                        <div class="empty-comments">
-                            <i class="bi bi-chat-square-text"></i>
-                            <p>Seja o primeiro a comentar!</p>
+                        <div class="empty-comments-state">
+                            <div class="empty-icon">
+                                <i class="bi bi-chat-dots"></i>
+                            </div>
+                            <h4>Nenhum comentário ainda</h4>
+                            <p>Seja o primeiro a compartilhar sua opinião! 🎬</p>
                         </div>
                     {% endif %}
                 </div>
@@ -597,6 +700,719 @@
 .text-cyan { color: var(--cyan-lumi); }
 .text-sec { color: var(--text-sec); }
 
+/* ===== COMMENTS SECTION - PREMIUM UX ===== */
+
+/* Seção Principal de Comentários */
+.comments-section {
+    margin-top: 4rem;
+}
+
+.section-title-bar {
+    margin-bottom: 2rem;
+    padding: 1.5rem 0;
+    border-bottom: 2px solid rgba(0, 255, 255, 0.1);
+}
+
+.section-title-bar h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.section-subtitle {
+    color: var(--text-sec);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.counter-badge {
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Container de Comentários - Grid */
+.comments-container {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 2rem;
+}
+
+/* ===== FORM SECTION ===== */
+.comment-form-section {
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+}
+
+.comment-form-card {
+    background: rgba(21, 25, 33, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 1.8rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.comment-form-card:hover {
+    border-color: rgba(0, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 255, 255, 0.1);
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.form-header h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+
+.form-badge {
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Form Group Custom */
+.form-group-custom {
+    margin-bottom: 1.3rem;
+}
+
+.form-label {
+    color: var(--text-sec);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.6rem;
+    display: block;
+}
+
+.form-textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    resize: vertical;
+    transition: all 0.3s ease;
+}
+
+.form-textarea:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.15);
+}
+
+.form-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* Char Counter */
+.char-counter {
+    display: flex;
+    justify-content: flex-end;
+    color: var(--text-sec);
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+.char-counter .current {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+/* Rating Picker */
+.rating-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.stars-container {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.star-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+}
+
+.star-btn:hover {
+    background: rgba(0, 255, 255, 0.1);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.star-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    border-color: var(--accent);
+    color: white;
+}
+
+.rating-text {
+    font-size: 0.85rem;
+    color: var(--text-sec);
+    height: 1.5rem;
+    line-height: 1.5rem;
+    font-weight: 500;
+}
+
+/* Rating Slider */
+.rating-slider-container {
+    position: relative;
+    margin-bottom: 0.8rem;
+}
+
+.rating-slider {
+    width: 100%;
+    height: 8px;
+    border-radius: 5px;
+    background: linear-gradient(to right, rgba(0, 255, 255, 0.2) 0%, rgba(0, 255, 255, 0.3) 100%);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+/* Thumb do slider */
+.rating-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00ffff, #00d9ff);
+    cursor: pointer;
+    border: 2px solid #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5), inset 0 0 8px rgba(0, 255, 255, 0.3);
+    transition: all 0.2s ease;
+}
+
+.rating-slider::-webkit-slider-thumb:hover {
+    width: 28px;
+    height: 28px;
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.8), inset 0 0 12px rgba(0, 255, 255, 0.5);
+}
+
+.rating-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00ffff, #00d9ff);
+    cursor: pointer;
+    border: 2px solid #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5), inset 0 0 8px rgba(0, 255, 255, 0.3);
+    transition: all 0.2s ease;
+}
+
+.rating-slider::-moz-range-thumb:hover {
+    width: 28px;
+    height: 28px;
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.8), inset 0 0 12px rgba(0, 255, 255, 0.5);
+}
+
+.rating-slider::-moz-range-track {
+    background: transparent;
+    border: none;
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-sec);
+    margin-top: 0.4rem;
+    font-weight: 600;
+}
+
+.rating-text-slider {
+    font-size: 0.9rem;
+    color: var(--accent);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    text-align: center;
+}
+
+/* Submit Button */
+.btn-submit-comment {
+    width: 100%;
+    background: linear-gradient(135deg, #00ffff, #00d9ff);
+    border: 2px solid #00ffff;
+    color: #000 !important;
+    padding: 0.9rem 1.2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.4), inset 0 0 10px rgba(0, 255, 255, 0.2);
+}
+
+.btn-submit-comment:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.6), inset 0 0 15px rgba(0, 255, 255, 0.3);
+    background: linear-gradient(135deg, #00ffff, #00eeff);
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+}
+
+.btn-submit-comment:active {
+    transform: translateY(0);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.4), inset 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+/* Login Card */
+.login-card {
+    background: rgba(21, 25, 33, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+}
+
+.login-icon {
+    font-size: 3rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+}
+
+.login-card h3 {
+    color: white;
+    font-size: 1.3rem;
+    margin-bottom: 0.8rem;
+}
+
+.login-card p {
+    color: var(--text-sec);
+    margin-bottom: 1.5rem;
+}
+
+.btn-login-redirect {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    color: #0a0e1a;
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.btn-login-redirect:hover {
+    transform: translateX(4px);
+    box-shadow: 0 6px 16px rgba(0, 255, 255, 0.2);
+}
+
+/* ===== COMMENTS LIST SECTION ===== */
+.comments-list-section {
+    min-height: 400px;
+}
+
+.list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+.list-header h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+
+.list-count {
+    background: rgba(0, 255, 255, 0.1);
+    color: var(--accent);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Comments Stack */
+.comments-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+/* Comment Item */
+.comment-item {
+    background: rgba(21, 25, 33, 0.6);
+    border: 1px solid rgba(0, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 1.3rem;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.comment-item:hover {
+    background: rgba(21, 25, 33, 0.8);
+    border-color: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 6px 20px rgba(0, 255, 255, 0.08);
+}
+
+/* Comment Header */
+.comment-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.user-profile {
+    display: flex;
+    gap: 0.8rem;
+    flex: 1;
+    align-items: flex-start;
+}
+
+.user-avatar {
+    width: 2.8rem;
+    height: 2.8rem;
+    background: linear-gradient(135deg, #00ffff, #00d9ff);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000 !important;
+    font-weight: 900;
+    font-size: 1rem;
+    flex-shrink: 0;
+    min-width: 2.8rem;
+    min-height: 2.8rem;
+    text-transform: uppercase;
+    border: 2px solid #00ffff;
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
+}
+
+.user-details {
+    flex: 1;
+}
+
+.user-name {
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    display: inline-block;
+}
+
+.user-name:hover {
+    color: var(--accent);
+}
+
+.comment-meta {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+    margin-top: 0.3rem;
+}
+
+.time-ago {
+    color: var(--text-sec);
+    font-size: 0.85rem;
+}
+
+.edited-badge {
+    background: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Rating Display */
+.rating-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.stars-display {
+    display: flex;
+    gap: 0.2rem;
+    font-size: 0.85rem;
+}
+
+.stars-display i {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.stars-display i.active {
+    color: var(--accent);
+    filter: drop-shadow(0 0 4px rgba(0, 255, 255, 0.4));
+}
+
+.rating-number {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+/* Comment Body */
+.comment-item-body {
+    margin-bottom: 1rem;
+}
+
+.comment-item-body p {
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.6;
+    margin: 0;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+/* Comment Actions */
+.comment-item-actions {
+    display: flex;
+    gap: 0.6rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.action-btn {
+    background: transparent;
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    color: var(--accent);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+}
+
+.action-btn:hover {
+    background: rgba(0, 255, 255, 0.1);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.delete-btn {
+    color: #ff4757;
+    border-color: rgba(255, 71, 87, 0.2);
+}
+
+.delete-btn:hover {
+    background: rgba(255, 71, 87, 0.1);
+    border-color: #ff4757;
+}
+
+/* Edit Modal */
+.edit-modal {
+    background: linear-gradient(135deg, rgba(15, 20, 30, 0.95), rgba(21, 25, 33, 0.95));
+    border: 1px solid rgba(0, 255, 255, 0.15);
+}
+
+.edit-modal .modal-header {
+    border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+.edit-modal .modal-body {
+    padding: 1.5rem;
+}
+
+.edit-textarea {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(0, 255, 255, 0.2) !important;
+    color: white !important;
+    resize: vertical;
+}
+
+.edit-textarea:focus {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.15) !important;
+}
+
+.rating-picker-edit {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.rating-radio {
+    display: none;
+}
+
+.star-label {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.star-label:hover {
+    background: rgba(0, 255, 255, 0.1);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.rating-radio:checked + .star-label {
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    border-color: var(--accent);
+    color: white;
+}
+
+/* Empty State */
+.empty-comments-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: rgba(21, 25, 33, 0.4);
+    border: 1px dashed rgba(0, 255, 255, 0.15);
+    border-radius: 10px;
+}
+
+.empty-icon {
+    font-size: 3.5rem;
+    color: rgba(0, 255, 255, 0.3);
+    margin-bottom: 1rem;
+}
+
+.empty-comments-state h4 {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0.5rem 0;
+}
+
+.empty-comments-state p {
+    color: var(--text-sec);
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width: 992px) {
+    .comments-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .comment-form-section {
+        position: static;
+        top: auto;
+    }
+
+    .comment-form-card {
+        position: static;
+    }
+
+    .comment-item-header {
+        flex-direction: column;
+    }
+
+    .rating-display {
+        align-self: flex-start;
+    }
+}
+
+@media (max-width: 768px) {
+    .comments-section {
+        margin-top: 2rem;
+    }
+
+    .section-title-bar h2 {
+        font-size: 1.5rem;
+    }
+
+    .comment-item {
+        padding: 1rem;
+    }
+
+    .user-avatar {
+        width: 2.3rem;
+        height: 2.3rem;
+        font-size: 0.8rem;
+    }
+
+    .stars-container {
+        flex-wrap: wrap;
+    }
+
+    .star-btn {
+        width: 2rem;
+        height: 2rem;
+    }
+
+    .comment-item-actions {
+        flex-wrap: wrap;
+    }
+}
+
 /* ALERTS */
 .messages-container {
     position: fixed; top: 80px; right: 20px; z-index: 9999;
@@ -628,4 +1444,60 @@
     .glass-form-card { position: static; }
 }
 </style>
+
+<!-- JAVASCRIPT PARA COMENTÁRIOS PREMIUM -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ===== CHARACTER COUNTER =====
+    const textareas = document.querySelectorAll('.form-textarea');
+    textareas.forEach(textarea => {
+        const counterContainer = textarea.parentElement.querySelector('.char-counter');
+        if (counterContainer) {
+            textarea.addEventListener('input', function() {
+                counterContainer.querySelector('.current').textContent = this.value.length;
+            });
+        }
+    });
+
+    // ===== RATING SLIDER =====
+    const slider = document.getElementById('nota_input');
+    const ratingTextSlider = document.querySelector('.rating-text-slider');
+
+    const ratingLabels = {
+        1: '⭐ Péssimo',
+        2: '⭐⭐ Ruim',
+        3: '⭐⭐⭐ Mediano',
+        4: '⭐⭐⭐⭐ Bom',
+        5: '⭐⭐⭐⭐⭐ Muito Bom',
+        6: '⭐⭐⭐⭐⭐ Ótimo',
+        7: '⭐⭐⭐⭐⭐ Excelente',
+        8: '⭐⭐⭐⭐⭐ Masterpiece',
+        9: '⭐⭐⭐⭐⭐ Sensacional',
+        10: '⭐⭐⭐⭐⭐ Perfeito!!'
+    };
+
+    if (slider) {
+        function updateSliderLabel(value) {
+            if (value) {
+                ratingTextSlider.textContent = ratingLabels[value];
+                ratingTextSlider.style.color = '#00ffff';
+            } else {
+                ratingTextSlider.textContent = 'Sem nota';
+                ratingTextSlider.style.color = 'var(--text-sec)';
+            }
+        }
+
+        slider.addEventListener('input', function() {
+            updateSliderLabel(this.value);
+        });
+
+        // Initialize
+        if (slider.value) {
+            updateSliderLabel(slider.value);
+        }
+    }
+
+});
+</script>
+
 {% endblock %}

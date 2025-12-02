@@ -1,46 +1,421 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Comentários de {{ usuario.username }} - AniLumi{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <h1 class="mb-4">Comentários de {{ usuario.get_full_name|default:usuario.username }}</h1>
+<!-- Fontes e Ícones -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <a href="{% url 'perfil:ver' usuario.username %}" class="btn btn-outline-secondary mb-4">
-        <i class="fas fa-arrow-left"></i> Voltar ao Perfil
-    </a>
+<div class="anilumi-wrapper">
+    <div class="anilumi-container">
 
-    {% if comentarios %}
-        <div class="list-group">
-            {% for coment in comentarios %}
-                <div class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                            <h6 class="mb-1">Anime #{{ coment.anime_id }}</h6>
-                            <small class="text-muted">{{ coment.criado_em|date:"d 'de' M 'de' Y 'às' H:i" }}</small>
-                            {% if coment.atualizado_em != coment.criado_em %}
-                                <small class="text-muted ms-2">(Editado)</small>
-                            {% endif %}
+        <!-- Cabeçalho -->
+        <div class="page-header">
+            <a href="{% url 'perfil:ver' usuario.username %}" class="back-link">
+                <i class="bi bi-arrow-left"></i> Voltar para Perfil
+            </a>
+            <h1 class="page-title">
+                <i class="bi bi-chat-dots-fill text-cyan"></i> Comentários de {{ usuario.username }}
+            </h1>
+            <p class="total-text">{{ total }} comentário{{ total|pluralize }}</p>
+        </div>
+
+        <!-- Listagem de Comentários -->
+        {% if comentarios %}
+            <div class="comments-full-list">
+                {% for coment in comentarios %}
+                    <div class="comment-full-card">
+                        <!-- Cabeçalho do Comentário -->
+                        <div class="comment-header-full">
+                            <div class="anime-ref">
+                                <a href="{% url 'core:anime_detail' coment.anime_id %}" class="anime-link-full">
+                                    <i class="bi bi-film"></i> Ver Anime #{{ coment.anime_id }}
+                                </a>
+                            </div>
+                            <div class="comment-meta">
+                                {% if coment.nota %}
+                                    <span class="rating-badge">★ {{ coment.nota }}/10</span>
+                                {% endif %}
+                                <span class="date-badge">{{ coment.criado_em|date:"d de M de Y" }}</span>
+                                {% if coment.atualizado_em != coment.criado_em %}
+                                    <span class="edited-badge"><i class="bi bi-pencil"></i> Editado</span>
+                                {% endif %}
+                            </div>
                         </div>
-                        <div>
-                            {% if coment.nota %}
-                                <span class="badge bg-warning text-dark">
-                                    <i class="fas fa-star"></i> {{ coment.nota }}/10
+
+                        <!-- Conteúdo do Comentário -->
+                        <div class="comment-content-full">
+                            <p>{{ coment.texto }}</p>
+                        </div>
+
+                        <!-- Status e Ações -->
+                        <div class="comment-footer">
+                            {% if coment.is_deleted %}
+                                <span class="status-deleted">
+                                    <i class="bi bi-trash"></i> Comentário Removido
                                 </span>
+                            {% else %}
+                                <span class="status-active">
+                                    <i class="bi bi-check-circle"></i> Ativo
+                                </span>
+                                <a href="{% url 'core:anime_detail' coment.anime_id %}" class="action-link">
+                                    Ir para Anime <i class="bi bi-arrow-right"></i>
+                                </a>
                             {% endif %}
                         </div>
                     </div>
-                    <p class="mb-3">{{ coment.texto }}</p>
-                    <a href="{% url 'core:anime_detail' coment.anime_id %}" class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-link"></i> Ver Anime
-                    </a>
+                {% endfor %}
+            </div>
+
+            <!-- Paginação -->
+            {% if page_obj.has_other_pages %}
+                <nav class="pagination-wrapper">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">
+                                    <i class="bi bi-chevron-double-left"></i> Primeira
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                    <i class="bi bi-chevron-left"></i> Anterior
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <!-- Páginas -->
+                        <li class="page-item active">
+                            <span class="page-link">
+                                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                    Próxima <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                    Última <i class="bi bi-chevron-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="bi bi-chat-square-dots"></i>
                 </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="alert alert-secondary">
-            <i class="fas fa-inbox"></i> Nenhum comentário encontrado
-        </div>
-    {% endif %}
+                <h3>Nenhum comentário encontrado</h3>
+                <p>{{ usuario.username }} ainda não comentou em nenhum anime.</p>
+                <a href="{% url 'perfil:ver' usuario.username %}" class="btn-neon">
+                    Voltar para Perfil
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
 </div>
+
+<style>
+    :root {
+        --bg-body: #090b10;
+        --bg-card: #151921;
+        --accent: #8e44ad;
+        --cyan-lumi: #00d2d3;
+        --text-main: #ffffff;
+        --text-sec: #a0aec0;
+        --border-glass: rgba(255, 255, 255, 0.08);
+    }
+
+    .anilumi-wrapper {
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        font-family: 'Inter', sans-serif;
+        min-height: 100vh;
+        padding: 3rem 0;
+    }
+
+    .anilumi-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+    }
+
+    /* --- HEADER --- */
+    .page-header {
+        margin-bottom: 3rem;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--cyan-lumi);
+        text-decoration: none;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        transition: opacity 0.3s;
+    }
+
+    .back-link:hover {
+        opacity: 0.8;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .total-text {
+        color: var(--text-sec);
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    /* --- COMENTÁRIOS LIST --- */
+    .comments-full-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .comment-full-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-glass);
+        border-radius: 12px;
+        padding: 2rem;
+        transition: all 0.3s;
+    }
+
+    .comment-full-card:hover {
+        border-color: var(--cyan-lumi);
+        box-shadow: 0 0 20px rgba(0, 210, 211, 0.1);
+    }
+
+    /* Header do comentário */
+    .comment-header-full {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .anime-link-full {
+        color: var(--cyan-lumi);
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: opacity 0.3s;
+    }
+
+    .anime-link-full:hover {
+        opacity: 0.8;
+    }
+
+    .comment-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .rating-badge, .date-badge, .edited-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+        background: rgba(142, 68, 173, 0.2);
+        border-radius: 8px;
+        color: var(--accent);
+    }
+
+    .edited-badge {
+        background: rgba(0, 210, 211, 0.2);
+        color: var(--cyan-lumi);
+    }
+
+    /* Conteúdo */
+    .comment-content-full {
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+        word-break: break-word;
+    }
+
+    .comment-content-full p {
+        margin: 0;
+        color: var(--text-main);
+    }
+
+    /* Footer */
+    .comment-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-glass);
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .status-active, .status-deleted {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .status-active {
+        color: #4ade80;
+    }
+
+    .status-deleted {
+        color: #f87171;
+    }
+
+    .action-link {
+        color: var(--cyan-lumi);
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: opacity 0.3s;
+    }
+
+    .action-link:hover {
+        opacity: 0.8;
+    }
+
+    /* --- PAGINAÇÃO --- */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        margin: 3rem 0 2rem;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 0.5rem;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .page-item {
+        display: flex;
+    }
+
+    .page-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.6rem 1rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-glass);
+        border-radius: 8px;
+        color: var(--cyan-lumi);
+        text-decoration: none;
+        transition: all 0.3s;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+
+    .page-link:hover {
+        background: rgba(0, 210, 211, 0.1);
+        border-color: var(--cyan-lumi);
+    }
+
+    .page-item.active .page-link {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: white;
+        cursor: default;
+    }
+
+    /* --- EMPTY STATE --- */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: var(--text-sec);
+        margin-bottom: 1rem;
+        opacity: 0.6;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-main);
+    }
+
+    .empty-state p {
+        color: var(--text-sec);
+        margin-bottom: 2rem;
+    }
+
+    .btn-neon {
+        display: inline-block;
+        padding: 0.8rem 2rem;
+        background: linear-gradient(135deg, var(--accent), #7c2e5a);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .btn-neon:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(142, 68, 173, 0.3);
+    }
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 1.8rem;
+        }
+
+        .comment-header-full {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .comment-footer {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .comment-full-card {
+            padding: 1.5rem;
+        }
+    }
+</style>
 {% endblock %}
+

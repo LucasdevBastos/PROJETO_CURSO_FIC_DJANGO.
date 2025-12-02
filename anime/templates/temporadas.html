@@ -1,0 +1,89 @@
+{% load static %}
+
+<div id="temporadas-tab-content" class="tab-content" style="display: none;">
+    {% if temporadas %}
+        {% for temporada_nome, animes_temporada in temporadas.items %}
+        <div class="temporada-section">
+            <div class="section-header" style="justify-content: space-between;">
+                <div class="header-info">
+                    <h3>{{ temporada_nome }}</h3>
+                    <p>{{ animes_temporada|length }} animes nesta temporada</p>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <a href="{% url 'calendar_app:month' %}" class="btn-calendar" target="_blank">
+                        <i class="bi bi-calendar2-week"></i> Ver no Calendário
+                    </a>
+                </div>
+            </div>
+
+            <div class="anime-grid">
+                {% for anime in animes_temporada %}
+                <a href="{% url 'core:anime_detail' anime.mal_id %}" style="text-decoration: none; color: inherit;">
+                    <article class="anilumi-card glass-variant">
+                        <div class="card-media">
+                            {% if anime.nota_mal %}
+                                <div class="score-badge mal-style">★ {{ anime.nota_mal }}</div>
+                            {% endif %}
+                            
+                            {% if anime.imagem_url %}
+                                <img src="{{ anime.imagem_url }}" alt="{{ anime.titulo }}" loading="lazy">
+                            {% else %}
+                                <div class="no-image">
+                                    <i class="bi bi-image"></i>
+                                </div>
+                            {% endif %}
+
+                            <div class="media-overlay">
+                                <button class="btn-icon"><i class="bi bi-calendar2-event"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="card-content">
+                            <div class="card-header-text">
+                                <h3 title="{{ anime.titulo }}">{{ anime.titulo|truncatechars:25 }}</h3>
+                                {% if anime.titulo_ingles %}
+                                    <small>{{ anime.titulo_ingles|truncatechars:30 }}</small>
+                                {% endif %}
+                            </div>
+
+                            <div class="card-tags">
+                                {% if anime.episodios %}
+                                    <span class="tag tag-outline">{{ anime.episodios }} eps</span>
+                                {% endif %}
+                                {% if anime.season %}
+                                    <span class="tag tag-filled">{{ anime.season|upper }}</span>
+                                {% endif %}
+                                {% if anime.year %}
+                                    <span class="tag tag-outline">{{ anime.year }}</span>
+                                {% endif %}
+                            </div>
+
+                            {% if anime.sinopse %}
+                                <p class="card-synopsis">{{ anime.sinopse|striptags|truncatechars:120 }}</p>
+                            {% endif %}
+
+                            <div class="card-footer">
+                                <div class="footer-stat">
+                                    <i class="bi bi-star-fill text-warning"></i> 
+                                    <span>{{ anime.nota_mal|default:"-" }}</span>
+                                </div>
+                                <div class="footer-stat">
+                                    <i class="bi bi-play-circle text-cyan"></i>
+                                    <span>{{ anime.episodios|default:"?" }} eps</span>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state-glass">
+            <div class="icon-box"><i class="bi bi-calendar2-week"></i></div>
+            <h3>Nenhuma temporada encontrada</h3>
+            <p>Não foi possível carregar os dados das temporadas. Verifique sua conexão.</p>
+        </div>
+    {% endif %}
+</div>

@@ -16,6 +16,7 @@ class Comentario(models.Model):
     )
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False, help_text="Soft delete: marca como deletado sem remover")
 
     class Meta:
         verbose_name = 'Comentário'
@@ -28,3 +29,18 @@ class Comentario(models.Model):
 
     def __str__(self):
         return f"Comentário de {self.user.username} sobre anime {self.anime_id}"
+
+    def is_active(self):
+        """Retorna True se o comentário está ativo (não foi deletado)"""
+        return not self.is_deleted
+
+    def soft_delete(self):
+        """Marca o comentário como deletado sem remover do banco"""
+        self.is_deleted = True
+        self.save()
+
+    def restore(self):
+        """Restaura um comentário deletado"""
+        self.is_deleted = False
+        self.save()
+

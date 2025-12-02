@@ -15,6 +15,9 @@ logger = logging.getLogger(__name__)
 def anime_detail(request, anime_id):
     """
     Exibir página detalhada de um anime
+    - Busca dados do anime na Jikan API
+    - Busca apenas comentários ATIVOS (is_deleted=False)
+    - Exibe formulário de comentário para usuários logados
     """
     # Buscar dados do anime na Jikan API
     anime = JikanAPI.get_anime_by_id(anime_id)
@@ -23,8 +26,11 @@ def anime_detail(request, anime_id):
         messages.error(request, "Anime não encontrado")
         return redirect('landing')
     
-    # Buscar comentários do anime
-    comentarios = Comentario.objects.filter(anime_id=anime_id).select_related('user')
+    # Buscar apenas comentários ATIVOS (não deletados)
+    comentarios_ativos = Comentario.objects.filter(
+        anime_id=anime_id,
+        is_deleted=False  # Filtro para soft delete
+    ).select_related('user').order_by('-criado_em')
     
     # Verificar se o usuário já favoritou este anime
     ja_favoritado = False
@@ -42,7 +48,7 @@ def anime_detail(request, anime_id):
     context = {
         'anime': anime,
         'anime_id': anime_id,
-        'comentarios': comentarios,
+        'comentarios_ativos': comentarios_ativos,  # Apenas ativos
         'ja_favoritado': ja_favoritado,
         'form_comentario': form_comentario,
     }

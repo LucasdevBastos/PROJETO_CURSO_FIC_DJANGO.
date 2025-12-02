@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.core.paginator import Paginator
 from .models import Perfil
 from .forms import PerfilForm
 from comentarios.models import Comentario
@@ -9,7 +10,12 @@ from core.models import Favorito
 
 
 def perfil_usuario(request, username):
-    """Exibir perfil de um usuário"""
+    """
+    Exibir perfil de um usuário
+    - Mostra últimos comentários ATIVOS
+    - Mostra últimos favoritos
+    - Cria perfil se não existir
+    """
     usuario = get_object_or_404(User, username=username)
     
     # Verificar se o usuário tem perfil, se não criar um
@@ -19,18 +25,20 @@ def perfil_usuario(request, username):
         perfil = Perfil.objects.create(user=usuario)
         messages.info(request, f"Perfil criado para {username}")
     
-    # Últimos 5 comentários do usuário
-    comentarios_recentes = usuario.comentarios_anime.all()[:5]
+    # Últimos 5 comentários ATIVOS do usuário
+    comentarios_recentes = usuario.comentarios_anime.filter(
+        is_deleted=False  # Apenas ativos
+    ).order_by('-criado_em')[:5]
     
     # Últimos 10 favoritos do usuário
-    favoritos = usuario.favoritos_anime.all()[:10]
+    favoritos = usuario.favoritos_anime.all().order_by('-criado_em')[:10]
     
     context = {
         'usuario': usuario,
         'perfil': perfil,
         'comentarios_recentes': comentarios_recentes,
         'favoritos': favoritos,
-        'total_comentarios': usuario.comentarios_anime.count(),
+        'total_comentarios': usuario.comentarios_anime.filter(is_deleted=False).count(),
         'total_favoritos': usuario.favoritos_anime.count(),
     }
     
@@ -66,26 +74,55 @@ def editar_perfil(request):
 
 
 def todos_comentarios_usuario(request, username):
-    """Listar todos os comentários de um usuário"""
+    """
+    Listar todos os comentários ATIVOS de um usuário com paginação
+    - 10 comentários por página
+    - Apenas comentários não deletados
+    - Ordenado por data decrescente
+    """
     usuario = get_object_or_404(User, username=username)
-    comentarios = usuario.comentarios_anime.all()
+    
+    # Filtrar apenas comentários ativos
+    comentarios_qs = usuario.comentarios_anime.filter(
+        is_deleted=False
+    ).order_by('-criado_em')
+    
+    # Paginação: 10 comentários por página
+    paginator = Paginator(comentarios_qs, 10)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
     
     context = {
         'usuario': usuario,
-        'comentarios': comentarios,
+        'page_obj': page_obj,
+        'comentarios': page_obj.object_list,
+        'total': paginator.count,
     }
     
     return render(request, 'perfil/todos_comentarios.html', context)
 
 
 def todos_favoritos_usuario(request, username):
-    """Listar todos os favoritos de um usuário"""
+    """
+    Listar todos os favoritos de um usuário com paginação
+    - 12 favoritos por página
+    - Ordenado por data decrescente
+    """
     usuario = get_object_or_404(User, username=username)
-    favoritos = usuario.favoritos_anime.all()
+    
+    favoritos_qs = usuario.favoritos_anime.all().order_by('-criado_em')
+    
+    # Paginação: 12 favoritos por página
+    paginator = Paginator(favoritos_qs, 12)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
     
     context = {
         'usuario': usuario,
-        'favoritos': favoritos,
+        'page_obj': page_obj,
+        'favoritos': page_obj.object_list,
+        'total': paginator.count,
     }
     
     return render(request, 'perfil/todos_favoritos.html', context)
+
