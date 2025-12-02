@@ -1,219 +1,291 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-
-<style>
-    /* Fundo Imersivo (Mesma imagem do Registro) */
-    .auth-wrapper {
-        background: url('https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=1920&auto=format&fit=crop') no-repeat center center;
-        background-size: cover;
-        min-height: 100vh; /* Ocupa toda a altura da tela */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-    }
-
-    /* Máscara escura sobre a imagem */
-    .auth-wrapper::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(5, 5, 5, 0.85); /* Escurece para destacar o card */
-        z-index: 1;
-    }
-
-    /* Container de Layout */
-    .login-container {
-        position: relative;
-        z-index: 2;
-        width: 100%;
-        padding: 20px;
-        display: flex;
-        justify-content: center;
-    }
-
-    /* Animação de Entrada Suave */
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Card com Efeito de Vidro (Glassmorphism) */
-    .login-card {
-        background: rgba(23, 23, 23, 0.75);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px;
-        padding: 40px;
-        width: 100%;
-        max-width: 420px; /* Um pouco mais estreito que o registro */
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
-        animation: fadeInUp 0.6s ease-out forwards;
-    }
-
-    /* Inputs Modernos */
-    .login-card input[type="text"],
-    .login-card input[type="password"] {
-        background-color: rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #ffffff;
-        width: 100%;
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-top: 6px;
-        transition: all 0.2s ease;
-        font-size: 0.95rem;
-    }
-
-    .login-card input:focus {
-        outline: none;
-        background-color: rgba(0, 0, 0, 0.6);
-        border-color: #a855f7;
-        box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.15);
-    }
-
-    .login-card label {
-        color: #d1d5db;
-        font-weight: 500;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    /* Botão de Login com Gradiente */
-    .btn-login {
-        background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
-        border: none;
-        color: white;
-        font-weight: 600;
-        padding: 12px;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: all 0.3s;
-        margin-top: 10px;
-        width: 100%;
-        display: block;
-    }
-    
-    .btn-login:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
-        color: white;
-    }
-
-    /* Botões Sociais (Estilo) */
-    .social-btn {
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
-        color: white;
-        padding: 10px;
-        border-radius: 8px;
-        transition: all 0.2s;
-        font-size: 0.9rem;
-    }
-    .social-btn:hover {
-        background: rgba(255,255,255,0.1);
-        color: white;
-    }
-
-    /* Divisor "OU" */
-    .divider {
-        display: flex;
-        align-items: center;
-        text-align: center;
-        color: #6b7280;
-        margin: 24px 0;
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 1px;
-    }
-    .divider::before, .divider::after {
-        content: '';
-        flex: 1;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    .divider span { padding: 0 10px; }
-
-    /* Link Accent */
-    .link-accent {
-        color: #a855f7;
-        text-decoration: none;
-        font-weight: 600;
-    }
-    .link-accent:hover {
-        color: #c084fc;
-        text-decoration: underline;
-    }
-</style>
+<!-- Fontes e Ícones -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <div class="auth-wrapper">
+    <!-- Glow de fundo decorativo -->
+    <div class="auth-glow"></div>
+
     <div class="login-container">
-        <div class="login-card">
+        <div class="login-glass-card">
             
             <!-- Cabeçalho -->
-            <div class="text-center mb-4">
-                <h1 class="h3 text-white fw-bold mb-1">Bem-vindo de volta</h1>
-                <p class="text-secondary small">Acesse sua watchlist sincronizada.</p>
+            <div class="auth-header">
+                <a href="{% url 'landing' %}" class="brand-logo">Anilumi<span class="dot">.</span></a>
+                <h1 class="welcome-title">Bem-vindo de volta</h1>
+                <p class="welcome-sub">Acesse sua watchlist sincronizada.</p>
             </div>
 
-            <!-- Botões Sociais (Mockup Visual) -->
-            <div class="row g-2 mb-3">
-                <div class="col-6">
-                    <a href="#" class="btn w-100 social-btn">
-                        <i class="fab fa-google me-2"></i>Google
-                    </a>
-                </div>
-                <div class="col-6">
-                    <a href="#" class="btn w-100 social-btn">
-                        <i class="fab fa-discord me-2"></i>Discord
-                    </a>
-                </div>
+            <!-- Botões Sociais -->
+            <div class="social-login-grid">
+                <a href="#" class="social-btn google">
+                    <i class="fab fa-google"></i> Google
+                </a>
+                <a href="#" class="social-btn discord">
+                    <i class="fab fa-discord"></i> Discord
+                </a>
             </div>
 
-            <div class="divider"><span>OU ENTRE COM E-MAIL</span></div>
+            <div class="divider-neon">
+                <span>OU ENTRE COM E-MAIL</span>
+            </div>
 
-            <!-- Mensagem de Erro -->
+            <!-- Mensagem de Erro (Estilizada) -->
             {% if form.errors %}
-                <div class="alert alert-danger d-flex align-items-center p-3 rounded-3 border-0 bg-danger bg-opacity-10 text-danger small mb-4" role="alert">
-                    <i class="fas fa-exclamation-circle me-3 fs-5"></i>
+                <div class="glass-alert error">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
                     <div>
-                       <strong>Erro de Acesso:</strong><br> Usuário ou senha inválidos.
+                        <strong>Erro de Acesso</strong><br>
+                        <span class="small">Usuário ou senha inválidos.</span>
                     </div>
                 </div>
             {% endif %}
 
-            <form method="post" novalidate>
+            <form method="post" novalidate class="auth-form">
                 {% csrf_token %}
 
-                <div class="mb-3">
-                    <label for="{{ form.username.id_for_label }}" class="form-label">Usuário</label>
-                    {{ form.username }}
-                </div>
-
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <label for="{{ form.password.id_for_label }}" class="form-label mb-0">Senha</label>
-                        <a href="#" class="small text-secondary text-decoration-none hover-white">Esqueceu?</a>
+                <div class="input-group-neon">
+                    <label for="{{ form.username.id_for_label }}">Usuário</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-person input-icon"></i>
+                        {{ form.username }}
                     </div>
-                    {{ form.password }}
                 </div>
 
-                <button type="submit" class="btn-login">
-                    Entrar na Plataforma
+                <div class="input-group-neon">
+                    <div class="label-row">
+                        <label for="{{ form.password.id_for_label }}">Senha</label>
+                        <a href="#" class="forgot-link">Esqueceu?</a>
+                    </div>
+                    <div class="input-wrapper">
+                        <i class="bi bi-lock input-icon"></i>
+                        {{ form.password }}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login-neon">
+                    Entrar na Plataforma <i class="bi bi-arrow-right"></i>
                 </button>
             </form>
 
             <!-- Rodapé do Card -->
-            <div class="text-center mt-4 pt-3 border-top border-secondary border-opacity-10">
-                <p class="text-secondary small mb-0">
-                    Novo por aqui?
-                    <a href="{% url 'users:register' %}" class="link-accent">Criar conta grátis</a>.
-                </p>
+            <div class="auth-footer">
+                <p>Novo por aqui? <a href="{% url 'users:register' %}" class="register-link">Criar conta grátis</a></p>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+/* --- ANILUMI AUTH SYSTEM --- */
+:root {
+    --bg-body: #090b10;
+    --accent: #8e44ad;       
+    --accent-glow: rgba(142, 68, 173, 0.5);
+    --cyan-lumi: #00d2d3;
+    --text-main: #ffffff;
+    --text-sec: #a0aec0;
+    --border-glass: rgba(255, 255, 255, 0.08);
+    --input-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Wrapper Imersivo */
+.auth-wrapper {
+    background: url('https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=1920&auto=format&fit=crop') no-repeat center center;
+    background-size: cover;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-main);
+    overflow: hidden;
+}
+
+/* Overlay Escuro com leve tom roxo */
+.auth-wrapper::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(5, 5, 5, 0.9), rgba(15, 10, 20, 0.85));
+    z-index: 1;
+}
+
+/* Glow de fundo animado */
+.auth-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(142, 68, 173, 0.15), transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.login-container {
+    position: relative; z-index: 2;
+    width: 100%; padding: 20px;
+    display: flex; justify-content: center;
+}
+
+/* CARD GLASSMORPHISM */
+.login-glass-card {
+    background: rgba(23, 23, 23, 0.75);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--border-glass);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    width: 100%; max-width: 450px;
+    box-shadow: 0 40px 80px -12px rgba(0, 0, 0, 0.8);
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* HEADER */
+.auth-header { text-align: center; margin-bottom: 2.5rem; }
+
+.brand-logo {
+    font-size: 1.5rem; font-weight: 800; color: white; text-decoration: none;
+    display: block; margin-bottom: 1.5rem; letter-spacing: -0.5px;
+}
+.brand-logo .dot { color: var(--cyan-lumi); }
+
+.welcome-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
+.welcome-sub { color: var(--text-sec); font-size: 0.95rem; }
+
+/* SOCIAL BUTTONS */
+.social-login-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+
+.social-btn {
+    display: flex; align-items: center; justify-content: center; gap: 0.8rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-glass);
+    color: white; padding: 0.8rem; border-radius: 12px;
+    text-decoration: none; font-size: 0.9rem; font-weight: 500;
+    transition: 0.3s;
+}
+.social-btn:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
+.social-btn i { font-size: 1.1rem; }
+.social-btn.discord:hover { color: #5865F2; border-color: rgba(88, 101, 242, 0.3); }
+.social-btn.google:hover { color: #DB4437; border-color: rgba(219, 68, 55, 0.3); }
+
+/* DIVIDER */
+.divider-neon {
+    display: flex; align-items: center; text-align: center;
+    color: var(--text-sec); margin: 2rem 0; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;
+}
+.divider-neon::before, .divider-neon::after {
+    content: ''; flex: 1; border-bottom: 1px solid var(--border-glass);
+}
+.divider-neon span { padding: 0 15px; opacity: 0.6; }
+
+/* FORMULÁRIO */
+.input-group-neon { margin-bottom: 1.5rem; }
+
+.input-group-neon label {
+    display: block; color: var(--text-sec); font-size: 0.85rem; font-weight: 600;
+    margin-bottom: 0.6rem;
+}
+
+.label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
+.label-row label { margin-bottom: 0; }
+
+.forgot-link { color: var(--accent); font-size: 0.8rem; text-decoration: none; transition: 0.3s; }
+.forgot-link:hover { color: var(--cyan-lumi); text-decoration: underline; }
+
+.input-wrapper { position: relative; }
+
+.input-icon {
+    position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+    color: var(--text-sec); font-size: 1.1rem; transition: 0.3s;
+}
+
+/* Estilização dos Inputs do Django */
+.auth-form input[type="text"],
+.auth-form input[type="password"] {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--border-glass);
+    color: white;
+    padding: 1rem 1rem 1rem 3rem; /* Espaço para ícone */
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    transition: 0.3s;
+    outline: none;
+}
+
+.auth-form input:focus {
+    border-color: var(--accent);
+    background: rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 0 4px rgba(142, 68, 173, 0.15);
+}
+
+.auth-form input:focus + .input-icon, 
+.input-wrapper:focus-within .input-icon {
+    color: var(--accent);
+}
+
+/* BOTÃO PRINCIPAL */
+.btn-login-neon {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
+    border: none; color: white;
+    padding: 1rem; border-radius: 12px;
+    font-size: 1rem; font-weight: 700;
+    cursor: pointer; margin-top: 1rem;
+    transition: 0.3s;
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+}
+
+.btn-login-neon:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);
+}
+
+/* ALERTS */
+.glass-alert {
+    background: rgba(231, 76, 60, 0.1);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    border-left: 4px solid #e74c3c;
+    color: #ffadad;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex; align-items: flex-start; gap: 1rem;
+    font-size: 0.9rem;
+}
+.glass-alert i { font-size: 1.2rem; }
+
+/* FOOTER */
+.auth-footer {
+    text-align: center; margin-top: 2rem; padding-top: 1.5rem;
+    border-top: 1px solid var(--border-glass);
+    color: var(--text-sec); font-size: 0.9rem;
+}
+
+.register-link {
+    color: var(--cyan-lumi); text-decoration: none; font-weight: 700;
+    margin-left: 0.3rem; transition: 0.3s;
+}
+.register-link:hover { text-decoration: underline; text-shadow: 0 0 10px rgba(0, 210, 211, 0.4); }
+
+/* Responsividade */
+@media (max-width: 480px) {
+    .login-glass-card { padding: 2rem 1.5rem; }
+    .auth-header h1 { font-size: 1.5rem; }
+    .social-login-grid { grid-template-columns: 1fr; }
+}
+</style>
 {% endblock %}

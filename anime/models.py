@@ -82,7 +82,7 @@ class Anime(models.Model):
 
     mal_id = models.IntegerField("ID do MyAnimeList", unique=True)
     titulo = models.CharField(max_length=255)
-    titulo_ingles = models.CharField(max_length=255, blank=True)
+    titulo_ingles = models.CharField(max_length=255, blank=True, null=True)
     sinopse = models.TextField(blank=True)
     imagem_url = models.URLField(blank=True)
     trailer_url = models.URLField(blank=True)

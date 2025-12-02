@@ -4,7 +4,7 @@
     {% if favoritos %}
         <div class="anime-grid">
             {% for anime in favoritos %}
-            <a href="{% url 'core:anime_detail' anime.mal_id %}" style="text-decoration: none; color: inherit;">
+            <a href="{% url 'core:meus_favoritos' %}" style="text-decoration: none; color: inherit;">
                 <article class="anilumi-card">
                     <div class="card-media">
                         {% if anime.nota_mal %}

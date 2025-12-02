@@ -11,6 +11,13 @@
 <div class="anilumi-wrapper">
     <div class="anilumi-container">
 
+        <!-- BOTÃO VOLTAR -->
+        <div class="btn-back-container">
+            <button class="btn-back" onclick="window.history.back()">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </button>
+        </div>
+
         <!-- CABEÇALHO -->
         <div class="section-header">
             <div class="header-info">
@@ -295,5 +302,33 @@
     .header-info h1 { font-size: 1.5rem; }
     .anime-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
 }
+
+/* ===== BOTÃO VOLTAR ===== */
+.btn-back-container {
+    margin-bottom: 2rem;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 217, 255, 0.1));
+    border: 1px solid rgba(0, 210, 211, 0.5);
+    color: #00d2d3;
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.btn-back:hover {
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 217, 255, 0.2));
+    border-color: #00d2d3;
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(0, 210, 211, 0.3);
+}
+
 </style>
 {% endblock %}
