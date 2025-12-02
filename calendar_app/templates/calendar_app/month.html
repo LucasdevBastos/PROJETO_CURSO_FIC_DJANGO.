@@ -1,110 +1,431 @@
 {% extends "base.html" %}
 
+{% block title %}Calendário - {{ month_name }} {{ year }} | AniLumi{% endblock %}
+
+{% block head_extra %}
+<style>
+    /* ========================================
+       CALENDAR PAGE - DESIGN PREMIUM
+       ======================================== */
+
+    /* Page Header */
+    .calendar-header {
+        padding: 2rem 0 2.5rem;
+        position: relative;
+    }
+
+    .calendar-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--border-color-hover), transparent);
+    }
+
+    .calendar-title-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .calendar-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--primary);
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+
+    .calendar-title {
+        font-size: 2rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .calendar-title i {
+        color: var(--primary);
+    }
+
+    .calendar-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    /* Navigation Buttons */
+    .calendar-nav {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .btn-nav {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        color: var(--text-main);
+        font-weight: 500;
+        font-size: 0.85rem;
+        text-decoration: none;
+        transition: all var(--transition-normal);
+    }
+
+    .btn-nav:hover {
+        border-color: var(--primary);
+        background: rgba(168, 85, 247, 0.1);
+        color: var(--text-main);
+    }
+
+    .btn-nav-primary {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border: none;
+        box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+    }
+
+    .btn-nav-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(168, 85, 247, 0.4);
+        background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary) 100%);
+    }
+
+    /* Calendar Container */
+    .calendar-container {
+        background: var(--card-bg);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        margin-top: 2rem;
+    }
+
+    /* Calendar Table */
+    .calendar-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .calendar-table th {
+        padding: 1rem 0.5rem;
+        background: linear-gradient(135deg, var(--dark-secondary) 0%, var(--card-bg) 100%);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-secondary);
+        text-align: center;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .calendar-table th:first-child {
+        color: #ef4444;
+    }
+
+    .calendar-table th:last-child {
+        color: #3b82f6;
+    }
+
+    /* Calendar Cells */
+    .calendar-cell {
+        vertical-align: top;
+        padding: 0.75rem;
+        min-height: 120px;
+        border: 1px solid var(--border-color);
+        background: var(--dark-bg);
+        transition: background var(--transition-fast);
+    }
+
+    .calendar-cell:hover {
+        background: var(--card-bg);
+    }
+
+    .calendar-cell.outside-month {
+        opacity: 0.35;
+        background: transparent;
+    }
+
+    .calendar-cell.is-today {
+        background: rgba(168, 85, 247, 0.08);
+        border-color: var(--primary);
+        box-shadow: inset 0 0 0 1px var(--primary);
+    }
+
+    /* Day Header */
+    .day-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .day-number {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+
+    .calendar-cell.outside-month .day-number {
+        color: var(--text-tertiary);
+    }
+
+    .today-badge {
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 0.2rem 0.5rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent-cyan) 100%);
+        color: white;
+        border-radius: var(--radius-full);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Airing List */
+    .airing-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .airing-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.35rem 0.5rem;
+        background: var(--card-bg);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-color);
+        font-size: 0.7rem;
+        transition: all var(--transition-fast);
+        cursor: pointer;
+    }
+
+    .airing-item:hover {
+        border-color: var(--primary);
+        background: rgba(168, 85, 247, 0.1);
+        transform: translateX(2px);
+    }
+
+    .airing-title {
+        flex: 1;
+        font-weight: 600;
+        color: var(--text-main);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .airing-time {
+        font-size: 0.65rem;
+        color: var(--primary-light);
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    /* Legend */
+    .calendar-legend {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+        padding: 1rem 1.5rem;
+        background: var(--card-bg);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+
+    .legend-dot.today {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent-cyan) 100%);
+        box-shadow: 0 0 8px var(--primary-glow);
+    }
+
+    .legend-dot.outside {
+        background: var(--text-tertiary);
+        opacity: 0.35;
+    }
+
+    /* Responsivo */
+    @media (max-width: 991.98px) {
+        .calendar-header {
+            padding: 1.5rem 0 2rem;
+        }
+
+        .calendar-title {
+            font-size: 1.5rem;
+        }
+
+        .calendar-nav {
+            flex-wrap: wrap;
+        }
+
+        .calendar-cell {
+            padding: 0.5rem;
+            min-height: 100px;
+        }
+
+        .airing-item {
+            padding: 0.25rem 0.4rem;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .calendar-table th {
+            padding: 0.75rem 0.25rem;
+            font-size: 0.65rem;
+        }
+
+        .calendar-cell {
+            min-height: 80px;
+            padding: 0.35rem;
+        }
+
+        .day-number {
+            font-size: 0.8rem;
+        }
+
+        .airing-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.15rem;
+        }
+
+        .calendar-legend {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h2 class="h4 mb-1">
-        Calendário – {{ month_name }} de {{ year }}
-      </h2>
-      <p class="text-muted mb-0 small">
-        Visualize os lançamentos de animes por dia.
-      </p>
+<div class="container py-3">
+    <!-- Header -->
+    <div class="calendar-header">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <div class="calendar-title-wrapper">
+                <span class="calendar-eyebrow">
+                    <i class="bi bi-calendar3"></i>
+                    Lançamentos do Mês
+                </span>
+                <h1 class="calendar-title">
+                    <i class="bi bi-calendar-week"></i>
+                    {{ month_name }} de {{ year }}
+                </h1>
+                <p class="calendar-subtitle">
+                    Acompanhe os lançamentos de animes organizados por dia
+                </p>
+            </div>
+
+            <div class="calendar-nav">
+                <a href="{% url 'calendar_app:month_view' year=prev_year month=prev_month %}" class="btn-nav">
+                    <i class="bi bi-chevron-left"></i>
+                    Anterior
+                </a>
+                <a href="{% url 'calendar_app:month_current' %}" class="btn-nav btn-nav-primary">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    Hoje
+                </a>
+                <a href="{% url 'calendar_app:month_view' year=next_year month=next_month %}" class="btn-nav">
+                    Próximo
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+        </div>
     </div>
 
-    <div class="d-flex gap-2">
-      <a href="{% url 'calendar_app:month_view' year=prev_year month=prev_month %}"
-         class="btn btn-outline-light btn-sm">
-        <i class="bi bi-chevron-left"></i> Mês anterior
-      </a>
-      <a href="{% url 'calendar_app:month_view' year=next_year month=next_month %}"
-         class="btn btn-outline-light btn-sm">
-        Próximo mês <i class="bi bi-chevron-right"></i>
-      </a>
-      <a href="{% url 'calendar_app:month_current' %}"
-         class="btn btn-primary btn-sm">
-        Hoje
-      </a>
+    <!-- Calendar -->
+    <div class="calendar-container">
+        <div class="table-responsive">
+            <table class="calendar-table">
+                <thead>
+                    <tr>
+                        <th>Dom</th>
+                        <th>Seg</th>
+                        <th>Ter</th>
+                        <th>Qua</th>
+                        <th>Qui</th>
+                        <th>Sex</th>
+                        <th>Sáb</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for week in weeks %}
+                        <tr>
+                            {% for day in week %}
+                                <td class="calendar-cell {% if not day.in_month %}outside-month{% endif %} {% if day.is_today %}is-today{% endif %}">
+                                    {% if day.date %}
+                                        <div class="day-header">
+                                            <span class="day-number">{{ day.date.day }}</span>
+                                            {% if day.is_today %}
+                                                <span class="today-badge">Hoje</span>
+                                            {% endif %}
+                                        </div>
+
+                                        {% if day.airings %}
+                                            <div class="airing-list">
+                                                {% for airing in day.airings %}
+                                                    <div class="airing-item">
+                                                        <span class="airing-title">
+                                                            {{ airing.anime.title|truncatechars:15 }}
+                                                        </span>
+                                                        {% if airing.airing_time %}
+                                                            <span class="airing-time">
+                                                                {{ airing.airing_time|time:"H:i" }}
+                                                            </span>
+                                                        {% endif %}
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-  </div>
 
-  <div class="table-responsive">
-    <table class="table table-dark table-bordered align-middle text-center mb-0"
-           style="border-color: rgba(148,163,184,.3);">
-      <thead>
-        <tr style="background:#020617;">
-          <th class="small text-uppercase">Dom</th>
-          <th class="small text-uppercase">Seg</th>
-          <th class="small text-uppercase">Ter</th>
-          <th class="small text-uppercase">Qua</th>
-          <th class="small text-uppercase">Qui</th>
-          <th class="small text-uppercase">Sex</th>
-          <th class="small text-uppercase">Sáb</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for week in weeks %}
-          <tr>
-            {% for day in week %}
-              <td
-                class="p-1 align-top"
-                style="
-                  background-color:#020617;
-                  border-width:1px;
-                  border-style:solid;
-                  border-color:
-                    {% if day.is_today %}
-                      #38bdf8
-                    {% elif day.in_month %}
-                      rgba(148,163,184,.3)
-                    {% else %}
-                      rgba(148,163,184,.15)
-                    {% endif %};
-                  {% if not day.in_month %}opacity:.35;{% endif %}
-                "
-              >
-                {% if day.date %}
-                  <!-- Número do dia -->
-                  <div class="d-flex justify-content-between align-items-center mb-1">
-                    <span class="fw-semibold small">
-                      {{ day.date.day }}
-                    </span>
-
-                    {% if day.is_today %}
-                      <span class="badge bg-info text-dark small">
-                        Hoje
-                      </span>
-                    {% endif %}
-                  </div>
-
-                  <!-- Lista de animes / episódios -->
-                  {% if day.airings %}
-                    <ul class="list-unstyled mb-0" style="font-size: .75rem;">
-                      {% for airing in day.airings %}
-                        <li class="text-start mb-1">
-                          <span class="badge bg-secondary me-1">
-                            {{ airing.anime.title|truncatechars:18 }}
-                          </span>
-                          {% if airing.airing_time %}
-                            <span class="text-muted">
-                              {{ airing.airing_time|time:"H:i" }}
-                            </span>
-                          {% endif %}
-                        </li>
-                      {% endfor %}
-                    </ul>
-                  {% endif %}
-                {% endif %}
-              </td>
-            {% endfor %}
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  <p class="mt-3 text-muted small">
-    * Dias fora do mês atual aparecem com menor opacidade.
-  </p>
+    <!-- Legend -->
+    <div class="calendar-legend">
+        <div class="legend-item">
+            <span class="legend-dot today"></span>
+            <span>Dia atual</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-dot outside"></span>
+            <span>Fora do mês</span>
+        </div>
+        <div class="legend-item">
+            <i class="bi bi-clock text-primary me-1"></i>
+            <span>Horário de exibição (hora local)</span>
+        </div>
+    </div>
 </div>
 {% endblock %}
