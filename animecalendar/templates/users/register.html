@@ -1,218 +1,448 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block title %}Criar Conta | AniLumi{% endblock %}
 
+{% block head_extra %}
 <style>
-    /* Fundo Imersivo para a página de Auth */
+    /* ========================================
+       REGISTER PAGE - DESIGN PREMIUM
+       ======================================== */
+    
+    /* Override main para register */
+    main {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /* Fundo Imersivo */
     .auth-wrapper {
-        background: url('https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=1920&auto=format&fit=crop') no-repeat center center;
-        background-size: cover;
         min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
         position: relative;
+        background: 
+            linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(10, 10, 10, 0.8) 100%),
+            url('https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=1920&auto=format&fit=crop') no-repeat center center;
+        background-size: cover;
+        padding: 2rem;
+        overflow: hidden;
     }
 
-    /* Máscara escura sobre a imagem */
+    /* Efeitos de fundo animados */
     .auth-wrapper::before {
         content: '';
         position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(5, 5, 5, 0.85); /* Escurece a imagem */
-        z-index: 1;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: 
+            radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 20% 80%, rgba(34, 211, 238, 0.1) 0%, transparent 50%);
+        animation: authGlow 10s ease-in-out infinite alternate;
+        pointer-events: none;
     }
 
-    /* Container do Card */
-    .login-container {
+    @keyframes authGlow {
+        0% { transform: rotate(0deg) scale(1); }
+        100% { transform: rotate(-10deg) scale(1.1); }
+    }
+
+    /* Card de Register com Glassmorphism */
+    .register-card {
         position: relative;
         z-index: 2;
-        width: 100%;
-        padding: 20px;
-        display: flex;
-        justify-content: center;
-    }
-
-    /* Animação de Entrada */
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .login-card {
-        background: rgba(23, 23, 23, 0.7); /* Translúcido */
-        backdrop-filter: blur(20px); /* Efeito Vidro */
-        -webkit-backdrop-filter: blur(20px);
+        background: rgba(24, 24, 27, 0.75);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
         border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px;
-        padding: 40px;
+        border-radius: var(--radius-xl);
+        padding: 3rem;
         width: 100%;
-        max-width: 500px;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        animation: fadeInUp 0.6s ease-out forwards;
+        max-width: 480px;
+        box-shadow: 
+            0 25px 50px -12px rgba(0, 0, 0, 0.5),
+            0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+        animation: cardFadeIn 0.6s ease-out;
     }
 
-    /* Inputs Modernos */
-    .login-card input {
-        background-color: rgba(0, 0, 0, 0.3);
+    @keyframes cardFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    /* Logo do Card */
+    .auth-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+    }
+
+    .auth-logo-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent-cyan) 100%);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: white;
+        box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3);
+    }
+
+    .auth-logo-text {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.75rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--text-main) 0%, var(--primary-light) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Header */
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .auth-header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .auth-header p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    /* Botões Sociais */
+    .social-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-social {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #ffffff;
-        width: 100%;
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-top: 6px;
-        transition: all 0.2s ease;
-        font-size: 0.95rem;
-    }
-
-    .login-card input:focus {
-        outline: none;
-        background-color: rgba(0, 0, 0, 0.6);
-        border-color: #a855f7;
-        box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.15);
-    }
-
-    .login-card label {
-        color: #d1d5db;
+        border-radius: var(--radius-sm);
+        color: var(--text-main);
         font-weight: 500;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all var(--transition-normal);
     }
 
-    /* Textos de Ajuda */
-    .help-text {
-        color: #9ca3af;
-        font-size: 0.75rem;
-        margin-top: 6px;
-        line-height: 1.4;
-    }
-    .help-text ul { padding-left: 1rem; margin-bottom: 0; }
-
-    /* Botão Principal */
-    .btn-register {
-        background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
-        border: none;
-        color: white;
-        font-weight: 600;
-        padding: 14px;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: all 0.3s;
-        margin-top: 10px;
-    }
-    .btn-register:hover {
+    .btn-social:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: var(--text-main);
         transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
-        color: white;
     }
 
-    /* Botões Sociais (Visual) */
-    .social-btn {
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
-        color: white;
-        padding: 10px;
-        border-radius: 8px;
-        transition: all 0.2s;
-    }
-    .social-btn:hover {
-        background: rgba(255,255,255,0.1);
-        color: white;
+    .btn-social i {
+        font-size: 1.1rem;
     }
 
+    /* Divider */
     .divider {
         display: flex;
         align-items: center;
-        text-align: center;
-        color: #6b7280;
-        margin: 20px 0;
-        font-size: 0.8rem;
+        gap: 1rem;
+        margin: 1.5rem 0;
     }
-    .divider::before, .divider::after {
+
+    .divider::before,
+    .divider::after {
         content: '';
         flex: 1;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
     }
-    .divider span { padding: 0 10px; }
 
-    .link-accent { color: #a855f7; text-decoration: none; font-weight: 600; }
-    .link-accent:hover { color: #c084fc; text-decoration: underline; }
+    .divider span {
+        color: var(--text-tertiary);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Formulário */
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+        display: block;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-sm);
+        color: var(--text-main);
+        font-size: 0.95rem;
+        transition: all var(--transition-normal);
+    }
+
+    .form-input:focus {
+        outline: none;
+        background: rgba(0, 0, 0, 0.4);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.15);
+    }
+
+    .form-input::placeholder {
+        color: var(--text-tertiary);
+    }
+
+    .form-input.is-invalid {
+        border-color: var(--danger);
+    }
+
+    /* Help Text */
+    .help-text {
+        margin-top: 0.5rem;
+        font-size: 0.75rem;
+        color: var(--text-tertiary);
+        line-height: 1.5;
+    }
+
+    .help-text ul {
+        margin: 0.25rem 0 0;
+        padding-left: 1rem;
+    }
+
+    .help-text li {
+        margin-bottom: 0.15rem;
+    }
+
+    /* Error Message */
+    .error-message {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--danger);
+    }
+
+    .error-message i {
+        font-size: 0.75rem;
+    }
+
+    /* Alert Error */
+    .alert-error {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-radius: var(--radius-sm);
+        margin-bottom: 1.5rem;
+    }
+
+    .alert-error i {
+        color: var(--danger);
+        font-size: 1.25rem;
+        flex-shrink: 0;
+        margin-top: 0.1rem;
+    }
+
+    .alert-error-content {
+        font-size: 0.875rem;
+        color: var(--danger);
+    }
+
+    .alert-error-content strong {
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    /* Submit Button */
+    .btn-submit {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border: none;
+        border-radius: var(--radius-sm);
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all var(--transition-bounce);
+        box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3);
+        margin-top: 0.5rem;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 32px rgba(168, 85, 247, 0.4);
+    }
+
+    .btn-submit:active {
+        transform: translateY(-1px);
+    }
+
+    /* Footer do Card */
+    .auth-footer {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        text-align: center;
+    }
+
+    .auth-footer p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .auth-footer a {
+        color: var(--primary);
+        font-weight: 600;
+        text-decoration: none;
+        transition: color var(--transition-fast);
+    }
+
+    .auth-footer a:hover {
+        color: var(--primary-light);
+    }
+
+    /* Responsivo */
+    @media (max-width: 480px) {
+        .register-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .social-buttons {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
+{% endblock %}
 
+{% block content %}
 <div class="auth-wrapper">
-    <div class="login-container">
-        <div class="login-card">
-            
-            <div class="text-center mb-4">
-                <h1 class="h3 text-white fw-bold mb-1">Crie sua conta</h1>
-                <p class="text-secondary small">Comece a organizar seus animes hoje.</p>
+    <div class="register-card">
+        <!-- Logo -->
+        <div class="auth-logo">
+            <span class="auth-logo-icon">
+                <i class="fas fa-play"></i>
+            </span>
+            <span class="auth-logo-text">AniLumi</span>
+        </div>
+
+        <!-- Header -->
+        <div class="auth-header">
+            <h1>Crie sua conta</h1>
+            <p>Comece a organizar seus animes hoje mesmo</p>
+        </div>
+
+        <!-- Botões Sociais -->
+        <div class="social-buttons">
+            <a href="#" class="btn-social">
+                <i class="fab fa-google"></i>
+                Google
+            </a>
+            <a href="#" class="btn-social">
+                <i class="fab fa-discord"></i>
+                Discord
+            </a>
+        </div>
+
+        <div class="divider">
+            <span>ou continue com email</span>
+        </div>
+
+        <!-- Alert de Erro Geral -->
+        {% if form.errors %}
+            <div class="alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <div class="alert-error-content">
+                    <strong>Atenção</strong>
+                    Verifique os campos abaixo e tente novamente.
+                </div>
             </div>
+        {% endif %}
 
-            <div class="row g-2 mb-3">
-                <div class="col-6">
-                    <a href="#" class="btn w-100 social-btn btn-sm">
-                        <i class="fab fa-google me-2"></i>Google
-                    </a>
+        <!-- Formulário -->
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="form-group">
+                    <label class="form-label" for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+                    
+                    <input 
+                        type="{% if 'password' in field.name %}password{% else %}text{% endif %}"
+                        class="form-input {% if field.errors %}is-invalid{% endif %}"
+                        id="{{ field.id_for_label }}"
+                        name="{{ field.html_name }}"
+                        placeholder="{% if 'username' in field.name %}Escolha um nome de usuário{% elif 'password1' in field.name %}Crie uma senha forte{% elif 'password2' in field.name %}Repita a senha{% endif %}"
+                        value="{% if 'password' not in field.name %}{{ field.value|default:'' }}{% endif %}"
+                        {% if 'password' in field.name %}autocomplete="new-password"{% else %}autocomplete="username"{% endif %}
+                        required
+                    >
+
+                    {% for error in field.errors %}
+                        <div class="error-message">
+                            <i class="fas fa-times-circle"></i>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                    {% if field.help_text %}
+                        <div class="help-text">
+                            {{ field.help_text|safe }}
+                        </div>
+                    {% endif %}
                 </div>
-                <div class="col-6">
-                    <a href="#" class="btn w-100 social-btn btn-sm">
-                        <i class="fab fa-discord me-2"></i>Discord
-                    </a>
-                </div>
-            </div>
+            {% endfor %}
 
-            <div class="divider"><span>OU CONTINUE COM E-MAIL</span></div>
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-user-plus me-2"></i>
+                Criar Conta Grátis
+            </button>
+        </form>
 
-            {% if form.errors %}
-                <div class="alert alert-danger d-flex align-items-start small p-3 rounded-3 border-0 bg-danger bg-opacity-10 text-danger" role="alert">
-                    <i class="fas fa-exclamation-circle mt-1 me-2"></i>
-                    <div>
-                        <strong>Atenção:</strong> Verifique os dados abaixo.
-                    </div>
-                </div>
-            {% endif %}
-
-            <form method="post" novalidate>
-                {% csrf_token %}
-
-                {% for field in form %}
-                    <div class="mb-3">
-                        <label class="form-label" for="{{ field.id_for_label }}">
-                            {{ field.label }}
-                        </label>
-                        
-                        {{ field }}
-                        
-                        {% for error in field.errors %}
-                            <div class="text-danger small mt-1">
-                                <i class="fas fa-times me-1"></i>{{ error }}
-                            </div>
-                        {% endfor %}
-
-                        {% if field.help_text %}
-                            <div class="help-text">
-                                {{ field.help_text|safe }}
-                            </div>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-register w-100">
-                        Criar Conta Grátis
-                    </button>
-                </div>
-            </form>
-
-            <div class="text-center mt-4 pt-3 border-top border-secondary border-opacity-10">
-                <p class="text-secondary small mb-0">
-                    Já possui cadastro?
-                    <a href="{% url 'users:login' %}" class="link-accent">Entrar agora</a>.
-                </p>
-            </div>
+        <!-- Footer -->
+        <div class="auth-footer">
+            <p>
+                Já possui uma conta? 
+                <a href="{% url 'users:login' %}">Entrar agora</a>
+            </p>
         </div>
     </div>
 </div>
-
 {% endblock %}

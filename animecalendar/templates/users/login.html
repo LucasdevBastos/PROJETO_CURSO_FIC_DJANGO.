@@ -1,219 +1,434 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block title %}Entrar | AniLumi{% endblock %}
 
+{% block head_extra %}
 <style>
-    /* Fundo Imersivo (Mesma imagem do Registro) */
+    /* ========================================
+       LOGIN PAGE - DESIGN PREMIUM
+       ======================================== */
+    
+    /* Override main para login */
+    main {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /* Fundo Imersivo */
     .auth-wrapper {
-        background: url('https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=1920&auto=format&fit=crop') no-repeat center center;
-        background-size: cover;
-        min-height: 100vh; /* Ocupa toda a altura da tela */
+        min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
         position: relative;
+        background: 
+            linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(10, 10, 10, 0.8) 100%),
+            url('https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=1920&auto=format&fit=crop') no-repeat center center;
+        background-size: cover;
+        padding: 2rem;
+        overflow: hidden;
     }
 
-    /* Máscara escura sobre a imagem */
+    /* Efeitos de fundo animados */
     .auth-wrapper::before {
         content: '';
         position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(5, 5, 5, 0.85); /* Escurece para destacar o card */
-        z-index: 1;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: 
+            radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(34, 211, 238, 0.1) 0%, transparent 50%);
+        animation: authGlow 10s ease-in-out infinite alternate;
+        pointer-events: none;
     }
 
-    /* Container de Layout */
-    .login-container {
+    @keyframes authGlow {
+        0% { transform: rotate(0deg) scale(1); }
+        100% { transform: rotate(10deg) scale(1.1); }
+    }
+
+    /* Card de Login com Glassmorphism */
+    .login-card {
         position: relative;
         z-index: 2;
-        width: 100%;
-        padding: 20px;
-        display: flex;
-        justify-content: center;
-    }
-
-    /* Animação de Entrada Suave */
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Card com Efeito de Vidro (Glassmorphism) */
-    .login-card {
-        background: rgba(23, 23, 23, 0.75);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
+        background: rgba(24, 24, 27, 0.75);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
         border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px;
-        padding: 40px;
+        border-radius: var(--radius-xl);
+        padding: 3rem;
         width: 100%;
-        max-width: 420px; /* Um pouco mais estreito que o registro */
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
-        animation: fadeInUp 0.6s ease-out forwards;
+        max-width: 420px;
+        box-shadow: 
+            0 25px 50px -12px rgba(0, 0, 0, 0.5),
+            0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+        animation: cardFadeIn 0.6s ease-out;
     }
 
-    /* Inputs Modernos */
-    .login-card input[type="text"],
-    .login-card input[type="password"] {
-        background-color: rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #ffffff;
-        width: 100%;
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-top: 6px;
-        transition: all 0.2s ease;
-        font-size: 0.95rem;
+    @keyframes cardFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
     }
 
-    .login-card input:focus {
-        outline: none;
-        background-color: rgba(0, 0, 0, 0.6);
-        border-color: #a855f7;
-        box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.15);
+    /* Logo do Card */
+    .auth-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
     }
 
-    .login-card label {
-        color: #d1d5db;
-        font-weight: 500;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    /* Botão de Login com Gradiente */
-    .btn-login {
-        background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
-        border: none;
+    .auth-logo-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent-cyan) 100%);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
         color: white;
-        font-weight: 600;
-        padding: 12px;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: all 0.3s;
-        margin-top: 10px;
-        width: 100%;
-        display: block;
-    }
-    
-    .btn-login:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
-        color: white;
+        box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3);
     }
 
-    /* Botões Sociais (Estilo) */
-    .social-btn {
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
-        color: white;
-        padding: 10px;
-        border-radius: 8px;
-        transition: all 0.2s;
+    .auth-logo-text {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.75rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--text-main) 0%, var(--primary-light) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Header */
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .auth-header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .auth-header p {
+        color: var(--text-secondary);
         font-size: 0.9rem;
     }
-    .social-btn:hover {
-        background: rgba(255,255,255,0.1);
-        color: white;
+
+    /* Botões Sociais */
+    .social-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
     }
 
-    /* Divisor "OU" */
+    .btn-social {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-sm);
+        color: var(--text-main);
+        font-weight: 500;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all var(--transition-normal);
+    }
+
+    .btn-social:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: var(--text-main);
+        transform: translateY(-2px);
+    }
+
+    .btn-social i {
+        font-size: 1.1rem;
+    }
+
+    /* Divider */
     .divider {
         display: flex;
         align-items: center;
-        text-align: center;
-        color: #6b7280;
-        margin: 24px 0;
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 1px;
+        gap: 1rem;
+        margin: 1.5rem 0;
     }
-    .divider::before, .divider::after {
+
+    .divider::before,
+    .divider::after {
         content: '';
         flex: 1;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
     }
-    .divider span { padding: 0 10px; }
 
-    /* Link Accent */
-    .link-accent {
-        color: #a855f7;
-        text-decoration: none;
+    .divider span {
+        color: var(--text-tertiary);
+        font-size: 0.75rem;
         font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
     }
-    .link-accent:hover {
-        color: #c084fc;
-        text-decoration: underline;
+
+    /* Formulário */
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+        display: block;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-sm);
+        color: var(--text-main);
+        font-size: 0.95rem;
+        transition: all var(--transition-normal);
+    }
+
+    .form-input:focus {
+        outline: none;
+        background: rgba(0, 0, 0, 0.4);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.15);
+    }
+
+    .form-input::placeholder {
+        color: var(--text-tertiary);
+    }
+
+    /* Password row */
+    .password-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .forgot-link {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        text-decoration: none;
+        transition: color var(--transition-fast);
+    }
+
+    .forgot-link:hover {
+        color: var(--primary);
+    }
+
+    /* Error Alert */
+    .alert-error {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-radius: var(--radius-sm);
+        margin-bottom: 1.5rem;
+    }
+
+    .alert-error i {
+        color: var(--danger);
+        font-size: 1.25rem;
+        flex-shrink: 0;
+        margin-top: 0.1rem;
+    }
+
+    .alert-error-content {
+        font-size: 0.875rem;
+        color: var(--danger);
+    }
+
+    .alert-error-content strong {
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    /* Submit Button */
+    .btn-submit {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border: none;
+        border-radius: var(--radius-sm);
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all var(--transition-bounce);
+        box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3);
+        margin-top: 0.5rem;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 32px rgba(168, 85, 247, 0.4);
+    }
+
+    .btn-submit:active {
+        transform: translateY(-1px);
+    }
+
+    /* Footer do Card */
+    .auth-footer {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        text-align: center;
+    }
+
+    .auth-footer p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .auth-footer a {
+        color: var(--primary);
+        font-weight: 600;
+        text-decoration: none;
+        transition: color var(--transition-fast);
+    }
+
+    .auth-footer a:hover {
+        color: var(--primary-light);
+    }
+
+    /* Responsivo */
+    @media (max-width: 480px) {
+        .login-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .social-buttons {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
+{% endblock %}
 
+{% block content %}
 <div class="auth-wrapper">
-    <div class="login-container">
-        <div class="login-card">
-            
-            <!-- Cabeçalho -->
-            <div class="text-center mb-4">
-                <h1 class="h3 text-white fw-bold mb-1">Bem-vindo de volta</h1>
-                <p class="text-secondary small">Acesse sua watchlist sincronizada.</p>
+    <div class="login-card">
+        <!-- Logo -->
+        <div class="auth-logo">
+            <span class="auth-logo-icon">
+                <i class="fas fa-play"></i>
+            </span>
+            <span class="auth-logo-text">AniLumi</span>
+        </div>
+
+        <!-- Header -->
+        <div class="auth-header">
+            <h1>Bem-vindo de volta</h1>
+            <p>Acesse sua conta e continue acompanhando seus animes</p>
+        </div>
+
+        <!-- Botões Sociais -->
+        <div class="social-buttons">
+            <a href="#" class="btn-social">
+                <i class="fab fa-google"></i>
+                Google
+            </a>
+            <a href="#" class="btn-social">
+                <i class="fab fa-discord"></i>
+                Discord
+            </a>
+        </div>
+
+        <div class="divider">
+            <span>ou continue com email</span>
+        </div>
+
+        <!-- Mensagem de Erro -->
+        {% if form.errors %}
+            <div class="alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <div class="alert-error-content">
+                    <strong>Erro de acesso</strong>
+                    Usuário ou senha inválidos. Tente novamente.
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Formulário -->
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label" for="{{ form.username.id_for_label }}">
+                    Usuário
+                </label>
+                <input 
+                    type="text" 
+                    class="form-input" 
+                    id="{{ form.username.id_for_label }}"
+                    name="{{ form.username.html_name }}"
+                    placeholder="Seu nome de usuário"
+                    value="{{ form.username.value|default:'' }}"
+                    autocomplete="username"
+                    required
+                >
             </div>
 
-            <!-- Botões Sociais (Mockup Visual) -->
-            <div class="row g-2 mb-3">
-                <div class="col-6">
-                    <a href="#" class="btn w-100 social-btn">
-                        <i class="fab fa-google me-2"></i>Google
-                    </a>
+            <div class="form-group">
+                <div class="password-header">
+                    <label class="form-label mb-0" for="{{ form.password.id_for_label }}">
+                        Senha
+                    </label>
+                    <a href="#" class="forgot-link">Esqueceu?</a>
                 </div>
-                <div class="col-6">
-                    <a href="#" class="btn w-100 social-btn">
-                        <i class="fab fa-discord me-2"></i>Discord
-                    </a>
-                </div>
+                <input 
+                    type="password" 
+                    class="form-input" 
+                    id="{{ form.password.id_for_label }}"
+                    name="{{ form.password.html_name }}"
+                    placeholder="Sua senha"
+                    autocomplete="current-password"
+                    required
+                >
             </div>
 
-            <div class="divider"><span>OU ENTRE COM E-MAIL</span></div>
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-sign-in-alt me-2"></i>
+                Entrar na Plataforma
+            </button>
+        </form>
 
-            <!-- Mensagem de Erro -->
-            {% if form.errors %}
-                <div class="alert alert-danger d-flex align-items-center p-3 rounded-3 border-0 bg-danger bg-opacity-10 text-danger small mb-4" role="alert">
-                    <i class="fas fa-exclamation-circle me-3 fs-5"></i>
-                    <div>
-                       <strong>Erro de Acesso:</strong><br> Usuário ou senha inválidos.
-                    </div>
-                </div>
-            {% endif %}
-
-            <form method="post" novalidate>
-                {% csrf_token %}
-
-                <div class="mb-3">
-                    <label for="{{ form.username.id_for_label }}" class="form-label">Usuário</label>
-                    {{ form.username }}
-                </div>
-
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <label for="{{ form.password.id_for_label }}" class="form-label mb-0">Senha</label>
-                        <a href="#" class="small text-secondary text-decoration-none hover-white">Esqueceu?</a>
-                    </div>
-                    {{ form.password }}
-                </div>
-
-                <button type="submit" class="btn-login">
-                    Entrar na Plataforma
-                </button>
-            </form>
-
-            <!-- Rodapé do Card -->
-            <div class="text-center mt-4 pt-3 border-top border-secondary border-opacity-10">
-                <p class="text-secondary small mb-0">
-                    Novo por aqui?
-                    <a href="{% url 'users:register' %}" class="link-accent">Criar conta grátis</a>.
-                </p>
-            </div>
+        <!-- Footer -->
+        <div class="auth-footer">
+            <p>
+                Novo por aqui? 
+                <a href="{% url 'users:register' %}">Criar conta grátis</a>
+            </p>
         </div>
     </div>
 </div>
-
 {% endblock %}
