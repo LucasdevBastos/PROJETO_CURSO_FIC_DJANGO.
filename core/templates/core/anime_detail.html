@@ -1,0 +1,631 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ anime.title }} - AniLumi{% endblock %}
+
+{% block content %}
+<!-- Fontes e Ícones -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<div class="anilumi-wrapper">
+    <div class="anilumi-container">
+
+        <!-- MENSAGENS / ALERTS (Estilizados) -->
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="glass-alert {{ message.tags }}">
+                        <i class="bi bi-info-circle-fill"></i> {{ message }}
+                        <button type="button" class="close-btn" onclick="this.parentElement.remove()">×</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- CONTEÚDO PRINCIPAL: GRID 2 COLUNAS -->
+        <div class="detail-grid">
+            
+            <!-- COLUNA ESQUERDA: Poster & Ações -->
+            <aside class="sidebar-poster">
+                <div class="poster-card">
+                    <img 
+                        src="{{ anime.images.jpg.large_image_url|default:anime.images.jpg.image_url }}" 
+                        alt="{{ anime.title }}"
+                        class="anime-poster"
+                    >
+                    <div class="poster-glow"></div>
+                </div>
+
+                <!-- Ações -->
+                <div class="actions-panel">
+                    {% if user.is_authenticated %}
+                        <form method="POST" action="{% url 'core:toggle_favorito' anime_id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action {% if ja_favoritado %}active{% endif %}">
+                                {% if ja_favoritado %}
+                                    <i class="fas fa-heart"></i> Remover dos Favoritos
+                                {% else %}
+                                    <i class="far fa-heart"></i> Favoritar
+                                {% endif %}
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'users:login' %}" class="btn-action">
+                            <i class="far fa-heart"></i> Favoritar
+                        </a>
+                    {% endif %}
+
+                    {% if anime.url %}
+                        <a href="{{ anime.url }}" target="_blank" class="btn-glass-small">
+                            <i class="fas fa-external-link-alt"></i> MyAnimeList
+                        </a>
+                    {% endif %}
+                </div>
+            </aside>
+
+            <!-- COLUNA DIREITA: Informações -->
+            <main class="main-info">
+                
+                <!-- Cabeçalho do Anime -->
+                <div class="anime-header">
+                    <h1 class="anime-title">{{ anime.title }}</h1>
+                    {% if anime.title_english %}
+                        <h2 class="anime-subtitle">{{ anime.title_english }}</h2>
+                    {% endif %}
+                </div>
+
+                <!-- Stats Row (Neon Badges) -->
+                <div class="stats-row">
+                    <div class="stat-box">
+                        <i class="fas fa-star text-warning"></i>
+                        <div class="stat-content">
+                            <span class="stat-value">{{ anime.score|default:"N/A" }}</span>
+                            <span class="stat-label">Score</span>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fas fa-users text-accent"></i>
+                        <div class="stat-content">
+                            <span class="stat-value">#{{ anime.popularity|default:"-" }}</span>
+                            <span class="stat-label">Popularidade</span>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fas fa-tv text-cyan"></i>
+                        <div class="stat-content">
+                            <span class="stat-value">{{ anime.episodes|default:"?" }}</span>
+                            <span class="stat-label">Episódios</span>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fas fa-clock text-sec"></i>
+                        <div class="stat-content">
+                            <span class="stat-value">{{ anime.status|default:"-" }}</span>
+                            <span class="stat-label">Status</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tags / Gêneros -->
+                {% if anime.genres or anime.themes %}
+                    <div class="genres-wrapper">
+                        {% for genre in anime.genres %}
+                            <span class="neon-tag">{{ genre.name }}</span>
+                        {% endfor %}
+                        {% for theme in anime.themes %}
+                            <span class="neon-tag outline">{{ theme.name }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Sinopse -->
+                {% if anime.synopsis %}
+                    <div class="content-card">
+                        <h3><i class="bi bi-text-paragraph"></i> Sinopse</h3>
+                        <p class="synopsis-text">{{ anime.synopsis }}</p>
+                    </div>
+                {% endif %}
+
+                <!-- Streaming (Grid) -->
+                {% if anime.streaming %}
+                    <div class="content-card">
+                        <h3><i class="bi bi-play-btn-fill text-accent"></i> Onde Assistir</h3>
+                        <div class="streaming-grid">
+                            {% for stream in anime.streaming %}
+                                <a href="{{ stream.url }}" target="_blank" class="streaming-item" title="{{ stream.name }}">
+                                    <i class="fas fa-play"></i> {{ stream.name }}
+                                </a>
+                            {% empty %}
+                                <p class="text-muted">Nenhuma plataforma encontrada.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Detalhes Técnicos (Grid) -->
+                <div class="content-card technical-grid">
+                    <div class="tech-item">
+                        <span class="label">Tipo</span>
+                        <span class="value">{{ anime.type|default:"TV" }}</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="label">Temporada</span>
+                        <span class="value">{{ anime.season|title|default:"-" }} {{ anime.year }}</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="label">Estúdio</span>
+                        <span class="value">
+                            {% for studio in anime.studios %}{{ studio.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                        </span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="label">Transmissão</span>
+                        <span class="value">{{ anime.broadcast.time|default:"-" }}</span>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+
+        <!-- SEÇÃO DE COMENTÁRIOS -->
+        <div class="comments-section mt-5">
+            <div class="section-title-bar">
+                <h2><i class="bi bi-chat-dots-fill text-cyan"></i> Comentários <span class="counter-badge">{{ comentarios.count }}</span></h2>
+            </div>
+
+            <div class="comments-layout">
+                <!-- Coluna Esquerda: Formulário -->
+                <div class="comment-form-col">
+                    {% if user.is_authenticated %}
+                        <div class="glass-form-card">
+                            <h4>Deixe sua opinião</h4>
+                            <form method="POST" action="{% url 'comentarios:criar' anime_id %}">
+                                {% csrf_token %}
+                                <div class="custom-input-group">
+                                    {{ form_comentario.as_p }}
+                                </div>
+                                <button type="submit" class="btn-neon w-100">
+                                    Enviar Comentário <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="login-prompt">
+                            <i class="bi bi-lock-fill"></i>
+                            <p>Faça <a href="{% url 'users:login' %}">login</a> para participar da discussão.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Coluna Direita: Lista -->
+                <div class="comment-list-col">
+                    {% if comentarios %}
+                        {% for comentario in comentarios %}
+                            <div class="comment-card">
+                                <div class="comment-header">
+                                    <div class="user-info">
+                                        <div class="avatar">{{ comentario.user.username|make_list|first|upper }}</div>
+                                        <div>
+                                            <a href="{% url 'perfil:ver' comentario.user.username %}" class="username">
+                                                {{ comentario.user.get_full_name|default:comentario.user.username }}
+                                            </a>
+                                            <span class="timestamp">{{ comentario.criado_em|date:"d M Y" }}</span>
+                                        </div>
+                                    </div>
+                                    {% if comentario.nota %}
+                                        <div class="user-score">★ {{ comentario.nota }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="comment-body">
+                                    <p>{{ comentario.texto }}</p>
+                                </div>
+
+                                <!-- Ações do Comentário -->
+                                {% if user.is_authenticated and user == comentario.user %}
+                                    <div class="comment-actions">
+                                        <button class="btn-icon-small" data-bs-toggle="modal" data-bs-target="#editModal{{ comentario.id }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <form method="POST" action="{% url 'comentarios:excluir' comentario.id %}" onsubmit="return confirm('Excluir este comentário?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-icon-small danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <!-- Modal Edição (Mantendo estrutura Bootstrap para funcionalidade, mas estilizando) -->
+                                    <div class="modal fade" id="editModal{{ comentario.id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content glass-modal">
+                                                <div class="modal-header border-0">
+                                                    <h5 class="modal-title">Editar</h5>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <form method="POST" action="{% url 'comentarios:editar' comentario.id %}">
+                                                    <div class="modal-body">
+                                                        {% csrf_token %}
+                                                        {{ form_comentario.as_p }}
+                                                    </div>
+                                                    <div class="modal-footer border-0">
+                                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                                                        <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-comments">
+                            <i class="bi bi-chat-square-text"></i>
+                            <p>Seja o primeiro a comentar!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+/* --- ANILUMI DESIGN SYSTEM (Detalhes) --- */
+:root {
+    --bg-body: #090b10;
+    --bg-card: #151921;
+    --bg-card-hover: #1f2430;
+    --accent: #8e44ad;       
+    --accent-glow: rgba(142, 68, 173, 0.5);
+    --cyan-lumi: #00d2d3;
+    --text-main: #ffffff;
+    --text-sec: #a0aec0;
+    --border-glass: rgba(255, 255, 255, 0.08);
+}
+
+.anilumi-wrapper {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 3rem 0;
+}
+
+.anilumi-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* --- GRID LAYOUT --- */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+/* --- COLUNA POSTER --- */
+.poster-card {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    border: 1px solid var(--border-glass);
+}
+
+.anime-poster {
+    width: 100%;
+    display: block;
+    transition: transform 0.3s;
+}
+
+/* Glow atrás do poster */
+.poster-glow {
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+    pointer-events: none;
+}
+
+.actions-panel {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.btn-action {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+    width: 100%;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+.btn-action:hover {
+    background: rgba(142, 68, 173, 0.1);
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+.btn-action.active {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.btn-glass-small {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-sec);
+    padding: 0.6rem;
+    border-radius: 8px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: 0.3s;
+    display: block;
+}
+.btn-glass-small:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+/* --- INFO COLUMN --- */
+.anime-header { margin-bottom: 2rem; }
+.anime-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(90deg, #fff, var(--cyan-lumi));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.anime-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-sec);
+    font-weight: 400;
+}
+
+/* Stats Row */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glass);
+    padding: 1rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.stat-box i { font-size: 1.5rem; }
+.stat-content { display: flex; flex-direction: column; }
+.stat-value { font-size: 1.1rem; font-weight: 700; color: white; }
+.stat-label { font-size: 0.75rem; color: var(--text-sec); text-transform: uppercase; }
+
+/* Tags */
+.genres-wrapper { margin-bottom: 2rem; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.neon-tag {
+    background: rgba(0, 210, 211, 0.1);
+    color: var(--cyan-lumi);
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(0, 210, 211, 0.2);
+}
+.neon-tag.outline {
+    background: transparent;
+    color: var(--text-sec);
+    border-color: var(--border-glass);
+}
+
+/* Content Cards */
+.content-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-glass);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.content-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+    display: flex; align-items: center; gap: 0.5rem;
+}
+
+.synopsis-text {
+    color: #ccc;
+    line-height: 1.7;
+    font-size: 0.95rem;
+}
+
+/* Streaming Grid */
+.streaming-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+}
+.streaming-item {
+    background: var(--bg-card);
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    border: 1px solid var(--border-glass);
+    transition: 0.3s;
+    display: flex; align-items: center; gap: 0.5rem;
+}
+.streaming-item:hover {
+    border-color: var(--accent);
+    background: rgba(142, 68, 173, 0.1);
+}
+
+/* Tech Grid */
+.technical-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+.tech-item {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 0.5rem;
+}
+.tech-item .label { color: var(--text-sec); font-size: 0.9rem; }
+.tech-item .value { color: white; font-weight: 500; font-size: 0.9rem; }
+
+/* --- COMENTÁRIOS --- */
+.comments-layout {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 2rem;
+}
+
+.section-title-bar {
+    border-bottom: 1px solid var(--border-glass);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+.counter-badge {
+    background: var(--bg-card);
+    padding: 2px 8px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    vertical-align: middle;
+}
+
+.glass-form-card {
+    background: var(--bg-card);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-glass);
+    position: sticky; top: 20px;
+}
+.custom-input-group textarea, .custom-input-group input {
+    width: 100%;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border-glass);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+.btn-neon {
+    background: var(--cyan-lumi);
+    color: #000;
+    border: none;
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.btn-neon:hover {
+    box-shadow: 0 0 15px var(--cyan-glow);
+}
+
+.comment-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-glass);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+.comment-header {
+    display: flex; justify-content: space-between; margin-bottom: 1rem;
+}
+.user-info { display: flex; gap: 0.8rem; align-items: center; }
+.avatar {
+    width: 40px; height: 40px; background: var(--bg-card);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-weight: bold; color: var(--accent); border: 1px solid var(--border-glass);
+}
+.username { color: white; font-weight: 600; text-decoration: none; font-size: 0.95rem; }
+.timestamp { display: block; font-size: 0.75rem; color: var(--text-sec); }
+.user-score { color: #f1c40f; font-weight: bold; }
+
+.comment-body { color: #ddd; font-size: 0.95rem; line-height: 1.6; }
+
+.comment-actions {
+    position: absolute; top: 1rem; right: 1rem; display: flex; gap: 0.5rem;
+}
+.btn-icon-small {
+    background: transparent; border: none; color: var(--text-sec); cursor: pointer; font-size: 0.9rem;
+}
+.btn-icon-small:hover { color: white; }
+.btn-icon-small.danger:hover { color: #e74c3c; }
+
+.login-prompt {
+    text-align: center;
+    padding: 2rem;
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    color: var(--text-sec);
+}
+
+/* Modal Dark Glass */
+.glass-modal {
+    background: #1a1d24;
+    color: white;
+    border: 1px solid var(--border-glass);
+}
+
+.text-warning { color: #f1c40f; }
+.text-accent { color: var(--accent); }
+.text-cyan { color: var(--cyan-lumi); }
+.text-sec { color: var(--text-sec); }
+
+/* ALERTS */
+.messages-container {
+    position: fixed; top: 80px; right: 20px; z-index: 9999;
+}
+.glass-alert {
+    background: rgba(21, 25, 33, 0.9);
+    backdrop-filter: blur(10px);
+    border-left: 4px solid var(--accent);
+    color: white;
+    padding: 1rem 1.5rem;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    display: flex; align-items: center; gap: 10px;
+    animation: slideIn 0.3s ease;
+}
+.close-btn { background: none; border: none; color: #aaa; font-size: 1.2rem; cursor: pointer; margin-left: auto; }
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* RESPONSIVO */
+@media (max-width: 992px) {
+    .detail-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .sidebar-poster { max-width: 300px; margin: 0 auto; }
+    .comments-layout { grid-template-columns: 1fr; }
+    .glass-form-card { position: static; }
+}
+</style>
+{% endblock %}

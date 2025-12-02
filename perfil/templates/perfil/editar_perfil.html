@@ -1,0 +1,433 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Perfil - AniLumi{% endblock %}
+
+{% block content %}
+<!-- Fontes e Ícones -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<div class="anilumi-wrapper">
+    <div class="anilumi-container">
+
+        <!-- HEADER -->
+        <div class="section-header center-aligned">
+            <div class="header-info">
+                <h1>
+                    <i class="bi bi-person-gear text-accent"></i>
+                    Editar <span class="text-gradient">Perfil</span>
+                </h1>
+                <p>Personalize como a comunidade vê você.</p>
+            </div>
+        </div>
+
+        <!-- MENSAGENS / ALERTS -->
+        {% if messages %}
+            <div class="messages-wrapper">
+                {% for message in messages %}
+                    <div class="glass-alert {{ message.tags }}">
+                        <i class="bi bi-info-circle-fill"></i> {{ message }}
+                        <button type="button" class="close-btn" onclick="this.parentElement.remove()">×</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="edit-layout">
+            <div class="glass-form-card">
+                
+                <form method="POST" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+
+                    <!-- SEÇÃO: AVATAR -->
+                    <div class="avatar-upload-section">
+                        <div class="current-avatar-wrapper">
+                            {% if perfil.avatar %}
+                                <img src="{{ perfil.avatar.url }}" alt="Avatar" class="avatar-preview" id="avatarPreview">
+                            {% else %}
+                                <div class="avatar-placeholder" id="avatarPlaceholder">
+                                    {{ user.username|first|upper }}
+                                </div>
+                            {% endif %}
+                            <div class="avatar-glow"></div>
+                            
+                            <!-- Ícone de câmera sobreposto -->
+                            <label for="{{ form.avatar.id_for_label }}" class="avatar-edit-overlay">
+                                <i class="bi bi-camera-fill"></i>
+                            </label>
+                        </div>
+
+                        <div class="upload-controls">
+                            <label class="form-label-neon">Imagem de Perfil</label>
+                            <div class="custom-file-input">
+                                {{ form.avatar }}
+                            </div>
+                            <small class="text-hint">Recomendado: 500x500px (JPG, PNG)</small>
+                            {% if form.avatar.errors %}
+                                <div class="error-msg">
+                                    {{ form.avatar.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- DIVISOR -->
+                    <div class="neon-divider-horizontal"></div>
+
+                    <!-- SEÇÃO: BIO -->
+                    <div class="form-group-neon">
+                        <label for="{{ form.bio.id_for_label }}" class="form-label-neon">
+                            <i class="bi bi-card-text"></i> {{ form.bio.label }}
+                        </label>
+                        
+                        <div class="input-wrapper">
+                            {{ form.bio }}
+                        </div>
+                        
+                        {% if form.bio.help_text %}
+                            <small class="text-hint">{{ form.bio.help_text }}</small>
+                        {% endif %}
+                        
+                        {% if form.bio.errors %}
+                            <div class="error-msg">
+                                {{ form.bio.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- AÇÕES -->
+                    <div class="form-actions">
+                        <a href="{% url 'perfil:ver' request.user.username %}" class="btn-glass">
+                            <i class="bi bi-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn-neon">
+                            <i class="bi bi-save"></i> Salvar Alterações
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+/* --- ANILUMI EDIT SYSTEM --- */
+:root {
+    --bg-body: #090b10;
+    --bg-card: #151921;
+    --accent: #8e44ad;       
+    --accent-glow: rgba(142, 68, 173, 0.5);
+    --cyan-lumi: #00d2d3;
+    --cyan-glow: rgba(0, 210, 211, 0.3);
+    --text-main: #ffffff;
+    --text-sec: #a0aec0;
+    --border-glass: rgba(255, 255, 255, 0.08);
+}
+
+.anilumi-wrapper {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 3rem 0;
+}
+
+.anilumi-container {
+    max-width: 800px; /* Mais estreito para formulários */
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* --- HEADER --- */
+.section-header.center-aligned {
+    text-align: center;
+    margin-bottom: 3rem;
+    border-bottom: none;
+}
+.header-info h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+}
+.header-info p {
+    color: var(--text-sec);
+    font-size: 1rem;
+}
+
+.text-accent { color: var(--accent); }
+.text-gradient {
+    background: linear-gradient(90deg, #fff, var(--cyan-lumi));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* --- GLASS FORM CARD --- */
+.edit-layout {
+    display: flex;
+    justify-content: center;
+}
+
+.glass-form-card {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border-glass);
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+/* --- AVATAR UPLOAD --- */
+.avatar-upload-section {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    margin-bottom: 2rem;
+}
+
+.current-avatar-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+}
+
+.avatar-preview {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--bg-body);
+    position: relative; z-index: 2;
+}
+
+.avatar-placeholder {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1px dashed var(--border-glass);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem; font-weight: 800; color: var(--text-sec);
+    position: relative; z-index: 2;
+}
+
+.avatar-glow {
+    position: absolute; inset: -5px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--cyan-lumi));
+    z-index: 1;
+    filter: blur(8px);
+    opacity: 0.6;
+}
+
+/* Ícone de Câmera */
+.avatar-edit-overlay {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 36px; height: 36px;
+    background: var(--cyan-lumi);
+    color: #000;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    z-index: 3;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    transition: 0.3s;
+}
+.avatar-edit-overlay:hover { transform: scale(1.1); }
+
+.upload-controls { flex-grow: 1; }
+
+/* Customização do Input de Arquivo Padrão */
+/* Esconde o input feio original, mas mantendo acessibilidade básica se necessário */
+.custom-file-input input[type="file"] {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-glass);
+    border-radius: 8px;
+    padding: 0.8rem;
+    width: 100%;
+    color: var(--text-sec);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+.custom-file-input input[type="file"]::file-selector-button {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glass);
+    color: var(--text-main);
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    margin-right: 1rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.custom-file-input input[type="file"]::file-selector-button:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.text-hint {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-sec);
+    margin-top: 0.5rem;
+    opacity: 0.7;
+}
+
+/* --- DIVISOR --- */
+.neon-divider-horizontal {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-glass), transparent);
+    margin: 2rem 0;
+}
+
+/* --- FORM FIELDS --- */
+.form-group-neon { margin-bottom: 2rem; }
+
+.form-label-neon {
+    display: block;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 0.8rem;
+    font-size: 0.95rem;
+}
+.form-label-neon i { color: var(--cyan-lumi); margin-right: 0.5rem; }
+
+/* Estilizando o Textarea gerado pelo Django */
+.input-wrapper textarea {
+    width: 100%;
+    background: rgba(0,0,0,0.2); /* Fundo bem escuro */
+    border: 1px solid var(--border-glass);
+    border-radius: 12px;
+    color: var(--text-main);
+    padding: 1rem;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    min-height: 120px;
+    transition: 0.3s;
+    outline: none;
+}
+
+.input-wrapper textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(142, 68, 173, 0.2);
+    background: rgba(0,0,0,0.3);
+}
+
+.error-msg {
+    color: #e74c3c;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    display: flex; align-items: center; gap: 0.5rem;
+}
+
+/* --- BUTTONS --- */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-neon {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.3s;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+}
+.btn-neon:hover {
+    background: #9b59b6;
+    box-shadow: 0 0 20px var(--accent-glow);
+    transform: translateY(-2px);
+}
+
+.btn-glass {
+    background: transparent;
+    border: 1px solid var(--border-glass);
+    color: var(--text-sec);
+    padding: 0.8rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.3s;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+}
+.btn-glass:hover {
+    border-color: #fff;
+    color: #fff;
+    background: rgba(255,255,255,0.05);
+}
+
+/* --- ALERTS --- */
+.messages-wrapper { margin-bottom: 2rem; }
+.glass-alert {
+    background: rgba(21, 25, 33, 0.95);
+    border: 1px solid var(--border-glass);
+    border-left: 4px solid var(--cyan-lumi);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 1rem;
+    animation: fadeIn 0.3s ease;
+}
+.close-btn {
+    background: none; border: none; color: var(--text-sec);
+    margin-left: auto; font-size: 1.2rem; cursor: pointer;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* RESPONSIVO */
+@media (max-width: 768px) {
+    .glass-form-card { padding: 1.5rem; }
+    .avatar-upload-section { flex-direction: column; text-align: center; gap: 1.5rem; }
+    .form-actions { flex-direction: column-reverse; }
+    .btn-neon, .btn-glass { width: 100%; justify-content: center; }
+}
+</style>
+
+<!-- Script Opcional para Preview de Imagem (JS simples inline) -->
+<script>
+    const avatarInput = document.querySelector('input[type="file"]');
+    const avatarPreview = document.getElementById('avatarPreview');
+    const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+
+    if (avatarInput) {
+        avatarInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (avatarPreview) {
+                        avatarPreview.src = e.target.result;
+                    } else if (avatarPlaceholder) {
+                        // Se não tinha imagem antes, cria uma tag img
+                        const newImg = document.createElement('img');
+                        newImg.src = e.target.result;
+                        newImg.alt = "Avatar Preview";
+                        newImg.className = "avatar-preview";
+                        newImg.id = "avatarPreview";
+                        avatarPlaceholder.parentNode.replaceChild(newImg, avatarPlaceholder);
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+</script>
+{% endblock %}

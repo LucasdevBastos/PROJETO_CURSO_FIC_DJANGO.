@@ -1,110 +1,583 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h2 class="h4 mb-1">
-        Calendário – {{ month_name }} de {{ year }}
-      </h2>
-      <p class="text-muted mb-0 small">
-        Visualize os lançamentos de animes por dia.
-      </p>
+<!-- Import da Fonte Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<div class="anilumi-wrapper">
+    
+    <!-- Background decorativo (Opcional, dá um efeito de luz no fundo) -->
+    <div class="bg-glow"></div>
+
+    <div class="calendar-container">
+        <!-- Header com navegação -->
+        <div class="calendar-header-glass">
+            <div class="calendar-nav">
+                <!-- Botão Anterior -->
+                <a href="{% url 'calendar_app:month_view' prev_year prev_month %}" 
+                   class="nav-btn" title="Mês anterior">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                
+                <!-- Título do Mês -->
+                <div class="calendar-title">
+                    <h1>{{ month_name|upper }} <span class="year-highlight">{{ year }}</span></h1>
+                    <p class="subtitle">Lançamentos da Temporada</p>
+                </div>
+                
+                <!-- Botão Próximo -->
+                <a href="{% url 'calendar_app:month_view' next_year next_month %}" 
+                   class="nav-btn" title="Próximo mês">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+            
+            <!-- Indicador de Hoje -->
+            {% if today.month == month and today.year == year %}
+            <div class="today-indicator">
+                <span class="badge-glow">
+                    <i class="fas fa-calendar-day"></i> Hoje: {{ today|date:"d" }}
+                </span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Calendário Grid -->
+        <div class="calendar-glass-panel">
+            <!-- Dias da semana -->
+            <div class="weekdays-header">
+                <div class="weekday-label">Segunda</div>
+                <div class="weekday-label">Terça</div>
+                <div class="weekday-label">Quarta</div>
+                <div class="weekday-label">Quinta</div>
+                <div class="weekday-label">Sexta</div>
+                <div class="weekday-label">Sábado</div>
+                <div class="weekday-label">Domingo</div>
+            </div>
+
+            <!-- Dias do mês -->
+            <div class="days-grid-wrapper">
+                {% for week in weeks %}
+                <div class="calendar-week-row">
+                    {% for day in week %}
+                    <div class="calendar-day-cell {% if not day.in_month %}other-month{% endif %} {% if day.is_today %}is-today{% endif %}">
+                        
+                        <!-- Cabeçalho do Dia (Número) -->
+                        <div class="day-header">
+                            <span class="day-number">{{ day.date|date:"d" }}</span>
+                            {% if day.anime_count > 0 %}
+                            <span class="anime-count-badge">{{ day.anime_count }}</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Lista de Animes do Dia -->
+                        {% if day.animes %}
+                        <div class="animes-grid-mini">
+                            {% for anime in day.animes %}
+                            <div class="anime-mini-card" data-mal-id="{{ anime.mal_id }}">
+                                
+                                <!-- Imagem -->
+                                {% if anime.image_url %}
+                                <div class="mini-poster">
+                                    <img src="{{ anime.image_url }}" alt="{{ anime.title }}" loading="lazy">
+                                    <!-- Score flutuante mini -->
+                                    {% if anime.score %}
+                                    <div class="mini-score">★ {{ anime.score }}</div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+
+                                <!-- Título (Visível apenas se não tiver imagem ou como fallback) -->
+                                <div class="mini-info">
+                                    <span class="mini-title">{{ anime.title|truncatechars:15 }}</span>
+                                </div>
+
+                                <!-- TOOLTIP HOVER (Estilo Anilumi) -->
+                                <div class="anime-tooltip">
+                                    <div class="tooltip-content">
+                                        <h4 class="tooltip-title">{{ anime.title }}</h4>
+                                        <div class="tooltip-meta">
+                                            {% if anime.broadcast_time %}
+                                                <span class="meta-tag"><i class="fas fa-clock"></i> {{ anime.broadcast_time }}</span>
+                                            {% endif %}
+                                            {% if anime.episodes %}
+                                                <span class="meta-tag">{{ anime.episodes }} eps</span>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        {% if anime.synopsis %}
+                                        <p class="tooltip-synopsis">{{ anime.synopsis|truncatewords:20 }}</p>
+                                        {% endif %}
+
+                                        <div class="tooltip-footer">
+                                            <span class="tooltip-score">★ {{ anime.score|default:"--" }}</span>
+                                            <a href="{{ anime.url }}" target="_blank" class="tooltip-btn">
+                                                MAL <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Fim Tooltip -->
+
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                            {% if day.in_month %}
+                            <div class="empty-state-day">
+                                <span>-</span>
+                            </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Legenda -->
+        <div class="calendar-legend-glass">
+            <div class="legend-item">
+                <div class="dot dot-today"></div>
+                <span>Hoje</span>
+            </div>
+            <div class="legend-item">
+                <div class="dot dot-anime"></div>
+                <span>Dia com Lançamento</span>
+            </div>
+             <div class="legend-item">
+                <div class="dot dot-other"></div>
+                <span>Outro Mês</span>
+            </div>
+        </div>
     </div>
-
-    <div class="d-flex gap-2">
-      <a href="{% url 'calendar_app:month_view' year=prev_year month=prev_month %}"
-         class="btn btn-outline-light btn-sm">
-        <i class="bi bi-chevron-left"></i> Mês anterior
-      </a>
-      <a href="{% url 'calendar_app:month_view' year=next_year month=next_month %}"
-         class="btn btn-outline-light btn-sm">
-        Próximo mês <i class="bi bi-chevron-right"></i>
-      </a>
-      <a href="{% url 'calendar_app:month_current' %}"
-         class="btn btn-primary btn-sm">
-        Hoje
-      </a>
-    </div>
-  </div>
-
-  <div class="table-responsive">
-    <table class="table table-dark table-bordered align-middle text-center mb-0"
-           style="border-color: rgba(148,163,184,.3);">
-      <thead>
-        <tr style="background:#020617;">
-          <th class="small text-uppercase">Dom</th>
-          <th class="small text-uppercase">Seg</th>
-          <th class="small text-uppercase">Ter</th>
-          <th class="small text-uppercase">Qua</th>
-          <th class="small text-uppercase">Qui</th>
-          <th class="small text-uppercase">Sex</th>
-          <th class="small text-uppercase">Sáb</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for week in weeks %}
-          <tr>
-            {% for day in week %}
-              <td
-                class="p-1 align-top"
-                style="
-                  background-color:#020617;
-                  border-width:1px;
-                  border-style:solid;
-                  border-color:
-                    {% if day.is_today %}
-                      #38bdf8
-                    {% elif day.in_month %}
-                      rgba(148,163,184,.3)
-                    {% else %}
-                      rgba(148,163,184,.15)
-                    {% endif %};
-                  {% if not day.in_month %}opacity:.35;{% endif %}
-                "
-              >
-                {% if day.date %}
-                  <!-- Número do dia -->
-                  <div class="d-flex justify-content-between align-items-center mb-1">
-                    <span class="fw-semibold small">
-                      {{ day.date.day }}
-                    </span>
-
-                    {% if day.is_today %}
-                      <span class="badge bg-info text-dark small">
-                        Hoje
-                      </span>
-                    {% endif %}
-                  </div>
-
-                  <!-- Lista de animes / episódios -->
-                  {% if day.airings %}
-                    <ul class="list-unstyled mb-0" style="font-size: .75rem;">
-                      {% for airing in day.airings %}
-                        <li class="text-start mb-1">
-                          <span class="badge bg-secondary me-1">
-                            {{ airing.anime.title|truncatechars:18 }}
-                          </span>
-                          {% if airing.airing_time %}
-                            <span class="text-muted">
-                              {{ airing.airing_time|time:"H:i" }}
-                            </span>
-                          {% endif %}
-                        </li>
-                      {% endfor %}
-                    </ul>
-                  {% endif %}
-                {% endif %}
-              </td>
-            {% endfor %}
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  <p class="mt-3 text-muted small">
-    * Dias fora do mês atual aparecem com menor opacidade.
-  </p>
 </div>
+
+<style>
+/* --- ANILUMI DESIGN SYSTEM --- */
+:root {
+    --bg-body: #090b10;
+    --bg-card: #151921;
+    --bg-card-hover: #1f2430;
+    --accent: #8e44ad;        /* Roxo */
+    --accent-glow: #9b59b6;
+    --cyan-lumi: #00d2d3;     /* Ciano Neon */
+    --text-main: #ffffff;
+    --text-sec: #a0aec0;
+    --border-glass: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(21, 25, 33, 0.7);
+    
+    /* Gradientes */
+    --grad-lumi: linear-gradient(135deg, #8e44ad 0%, #00d2d3 100%);
+    --grad-dark: linear-gradient(180deg, rgba(21, 25, 33, 0) 0%, rgba(9, 11, 16, 0.9) 100%);
+}
+
+/* Reset básico local */
+.anilumi-wrapper {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: 2rem;
+    overflow-x: hidden;
+}
+
+/* Efeito de luz de fundo */
+.bg-glow {
+    position: absolute;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 500px;
+    background: radial-gradient(circle, rgba(142, 68, 173, 0.15) 0%, rgba(0,0,0,0) 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.calendar-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* --- HEADER --- */
+.calendar-header-glass {
+    background: rgba(21, 25, 33, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-glass);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.calendar-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 600px;
+}
+
+.calendar-title {
+    text-align: center;
+}
+
+.calendar-title h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin: 0;
+    background: linear-gradient(90deg, #fff, var(--cyan-lumi));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.year-highlight {
+    font-weight: 300;
+    color: var(--text-sec);
+    -webkit-text-fill-color: var(--text-sec);
+}
+
+.subtitle {
+    color: var(--text-sec);
+    font-size: 0.9rem;
+    margin-top: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.nav-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-glass);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-main);
+    transition: 0.3s;
+    font-size: 1.1rem;
+}
+
+.nav-btn:hover {
+    background: var(--accent);
+    box-shadow: 0 0 15px rgba(142, 68, 173, 0.4);
+    border-color: var(--accent);
+}
+
+.today-indicator {
+    margin-top: 1.5rem;
+}
+
+.badge-glow {
+    background: rgba(0, 210, 211, 0.1);
+    color: var(--cyan-lumi);
+    border: 1px solid var(--cyan-lumi);
+    padding: 0.5rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 0 10px rgba(0, 210, 211, 0.2);
+}
+
+/* --- GRID PRINCIPAL --- */
+.calendar-glass-panel {
+    background: var(--bg-card);
+    border-radius: 20px;
+    /* overflow: hidden; REMOVIDO para que tooltips possam sair da caixa */
+    border: 1px solid var(--border-glass);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.weekdays-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: rgba(0,0,0,0.3);
+    border-bottom: 1px solid var(--border-glass);
+    /* Adicionado bordas arredondadas topo apenas */
+    border-radius: 20px 20px 0 0;
+}
+
+.weekday-label {
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-sec);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Estrutura dos dias */
+.days-grid-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-week-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-bottom: 1px solid var(--border-glass); 
+}
+.calendar-week-row:last-child { border-bottom: none; }
+
+/* Manter arredondamento inferior nas células da última linha */
+.calendar-week-row:last-child .calendar-day-cell:first-child { border-bottom-left-radius: 20px; }
+.calendar-week-row:last-child .calendar-day-cell:last-child { border-bottom-right-radius: 20px; }
+
+
+.calendar-day-cell {
+    min-height: 180px;
+    padding: 0.8rem;
+    border-right: 1px solid var(--border-glass);
+    position: relative;
+    transition: background 0.2s;
+}
+.calendar-day-cell:last-child { border-right: none; }
+
+.calendar-day-cell:hover {
+    background: rgba(255,255,255,0.02);
+    /* Certifica que o z-index não cause problemas de empilhamento com tooltips vizinhos */
+    z-index: 5;
+}
+
+/* Dia fora do mês */
+.calendar-day-cell.other-month {
+    background: rgba(0,0,0,0.2);
+    opacity: 0.6;
+}
+.calendar-day-cell.other-month .day-number { color: #4a5568; }
+
+/* Dia Atual (Estilo Lumi) */
+.calendar-day-cell.is-today {
+    background: rgba(142, 68, 173, 0.05);
+    box-shadow: inset 0 0 20px rgba(142, 68, 173, 0.1);
+}
+.calendar-day-cell.is-today .day-number {
+    color: var(--cyan-lumi);
+    text-shadow: 0 0 10px rgba(0, 210, 211, 0.5);
+}
+
+/* Cabeçalho do dia */
+.day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+}
+
+.day-number {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.anime-count-badge {
+    background: var(--bg-body);
+    border: 1px solid var(--border-glass);
+    color: var(--text-sec);
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* --- MINI ANIMES GRID --- */
+.animes-grid-mini {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 0.5rem;
+}
+
+.anime-mini-card {
+    position: relative; /* Para posicionar o tooltip */
+    cursor: pointer;
+    border-radius: 8px;
+    transition: transform 0.2s;
+}
+
+.anime-mini-card:hover {
+    transform: scale(1.05);
+    z-index: 20; /* Maior que a célula */
+}
+
+.mini-poster {
+    width: 100%;
+    aspect-ratio: 2/3;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.mini-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mini-score {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.8);
+    color: #f1c40f;
+    font-size: 0.6rem;
+    text-align: center;
+    padding: 2px 0;
+    font-weight: bold;
+}
+
+.mini-info {
+    display: none; /* Esconde título em desktop se tiver imagem, limpa o visual */
+}
+
+/* --- TOOLTIP FLUTUANTE --- */
+.anime-tooltip {
+    position: absolute;
+    bottom: 110%; /* Aparece acima do card */
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    width: 240px;
+    background: #1a202c; /* Fundo sólido para leitura */
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 1rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 9999; /* Z-index altíssimo para garantir que fique sobre tudo */
+    pointer-events: none; /* Evita flicker */
+}
+
+/* Seta do Tooltip */
+.anime-tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 12px;
+    height: 12px;
+    background: #1a202c;
+    border-right: 1px solid var(--accent);
+    border-bottom: 1px solid var(--accent);
+}
+
+.anime-mini-card:hover .anime-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+.tooltip-title {
+    color: var(--text-main);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+}
+
+.tooltip-meta {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.meta-tag {
+    font-size: 0.7rem;
+    background: rgba(255,255,255,0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--text-sec);
+}
+
+.tooltip-synopsis {
+    font-size: 0.75rem;
+    color: #cbd5e0;
+    margin-bottom: 0.8rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.tooltip-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 0.5rem;
+}
+
+.tooltip-score { color: #f1c40f; font-weight: bold; font-size: 0.85rem; }
+
+.tooltip-btn {
+    font-size: 0.75rem;
+    color: var(--cyan-lumi);
+    text-decoration: none;
+    font-weight: 600;
+}
+.tooltip-btn:hover { text-decoration: underline; }
+
+
+/* --- LEGENDA & EMPTY STATES --- */
+.empty-state-day {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50%;
+    color: rgba(255,255,255,0.05);
+    font-size: 2rem;
+}
+
+.calendar-legend-glass {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 1rem;
+    background: rgba(255,255,255,0.02);
+    border-radius: 12px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-sec);
+}
+
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot-today { background: var(--cyan-lumi); box-shadow: 0 0 5px var(--cyan-lumi); }
+.dot-anime { background: var(--text-main); }
+.dot-other { background: #4a5568; }
+
+/* --- RESPONSIVIDADE --- */
+@media (max-width: 768px) {
+    .calendar-container { padding: 1rem; }
+    .calendar-header-glass { padding: 1.5rem; }
+    .calendar-title h1 { font-size: 1.5rem; }
+    
+    .weekday-label { font-size: 0.65rem; padding: 0.5rem; }
+    
+    .calendar-day-cell { min-height: 100px; padding: 0.4rem; }
+    .animes-grid-mini { grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); }
+    .mini-score { font-size: 0.5rem; }
+    
+    /* Esconder tooltip em mobile para não atrapalhar, ou adaptar para clique */
+    .anime-tooltip { display: none; }
+}
+</style>
 {% endblock %}

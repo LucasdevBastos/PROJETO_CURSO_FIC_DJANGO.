@@ -1,5 +1,6 @@
 # core/models.py
 from django.db import models
+from django.contrib.auth.models import User
 
 from anime.models import Anime, Temporada
 
@@ -84,3 +85,23 @@ class SearchLog(models.Model):
 
     def __str__(self):
         return self.termo_busca
+
+
+class Favorito(models.Model):
+    """Modelo para animes favoritos do usuário"""
+    anime_id = models.IntegerField(help_text="ID do anime no MyAnimeList")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favoritos_anime')
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Favorito'
+        verbose_name_plural = 'Favoritos'
+        unique_together = ('anime_id', 'user')
+        ordering = ['-criado_em']
+        indexes = [
+            models.Index(fields=['user', '-criado_em']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} favoritou anime {self.anime_id}"
+

@@ -24,6 +24,7 @@ def anime_list(request):
         for item in data[:12]:  # pega só 12 pra testar
             images = item.get("images", {}).get("jpg", {}) or {}
             animes_mal.append({
+                "mal_id": item.get("mal_id"),  # ID do MyAnimeList
                 "titulo": item.get("title") or "Sem título",
                 "titulo_ingles": item.get("title_english"),
                 "imagem_url": images.get("image_url"),

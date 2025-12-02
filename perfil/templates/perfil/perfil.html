@@ -1,0 +1,410 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Perfil de {{ usuario.username }} - Anilumi{% endblock %}
+
+{% block content %}
+<!-- Fontes e Ícones -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<div class="anilumi-wrapper">
+    <div class="anilumi-container">
+
+        <!-- ========================== -->
+        <!-- HEADER DO PERFIL (GLASS)   -->
+        <!-- ========================== -->
+        <div class="profile-header-card">
+            <div class="profile-cover-glow"></div>
+            
+            <div class="profile-content">
+                <!-- Avatar -->
+                <div class="profile-avatar-wrapper">
+                    <img 
+                        src="{{ perfil.get_avatar_url }}" 
+                        alt="{{ usuario.username }}" 
+                        class="profile-avatar"
+                    >
+                    <div class="avatar-border-glow"></div>
+                </div>
+
+                <!-- Info do Usuário -->
+                <div class="profile-info">
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <h1 class="username">{{ usuario.get_full_name|default:usuario.username }}</h1>
+                        <span class="handle">@{{ usuario.username }}</span>
+                        {% if user == usuario %}
+                            <a href="{% url 'perfil:editar' %}" class="btn-edit-glass">
+                                <i class="fas fa-pencil-alt"></i> Editar
+                            </a>
+                        {% endif %}
+                    </div>
+                    
+                    {% if perfil.bio %}
+                        <p class="bio-text">{{ perfil.bio }}</p>
+                    {% else %}
+                        <p class="bio-text empty">Sem biografia definida.</p>
+                    {% endif %}
+
+                    <div class="member-since">
+                        <i class="bi bi-calendar4-week"></i> Membro desde {{ usuario.date_joined|date:"d de F de Y" }}
+                    </div>
+                </div>
+
+                <!-- Estatísticas -->
+                <div class="profile-stats">
+                    <div class="stat-box">
+                        <span class="stat-number">{{ total_favoritos }}</span>
+                        <span class="stat-label">Favoritos</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-number">{{ total_comentarios }}</span>
+                        <span class="stat-label">Comentários</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================== -->
+        <!-- ABAS DE NAVEGAÇÃO          -->
+        <!-- ========================== -->
+        <div class="custom-tabs-wrapper">
+            <ul class="nav nav-tabs custom-tabs" id="profileTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="favoritos-tab" data-bs-toggle="tab" data-bs-target="#favoritos" type="button" role="tab">
+                        <i class="bi bi-heart-fill text-accent"></i> Favoritos
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="comentarios-tab" data-bs-toggle="tab" data-bs-target="#comentarios" type="button" role="tab">
+                        <i class="bi bi-chat-dots-fill text-cyan"></i> Comentários
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- CONTEÚDO DAS ABAS -->
+        <div class="tab-content" id="profileTabsContent">
+            
+            <!-- ABA: FAVORITOS -->
+            <div class="tab-pane fade show active" id="favoritos" role="tabpanel">
+                {% if favoritos %}
+                    <div class="anime-grid-mini">
+                        {% for fav in favoritos %}
+                            <article class="mini-anime-card">
+                                <a href="{% url 'core:anime_detail' fav.anime_id %}" class="card-link-wrapper">
+                                    <div class="mini-poster">
+                                        <!-- Placeholder se não tiver imagem no objeto fav (adapte se necessário) -->
+                                        <div class="poster-placeholder">
+                                            <span>#{{ fav.anime_id }}</span>
+                                            <i class="bi bi-play-fill icon-play"></i>
+                                        </div>
+                                    </div>
+                                    <div class="mini-info">
+                                        <span class="anime-id">ID: {{ fav.anime_id }}</span>
+                                        <span class="date-added">{{ fav.criado_em|date:"d/m/Y" }}</span>
+                                    </div>
+                                </a>
+                            </article>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if total_favoritos > 10 %}
+                        <div class="view-all-wrapper">
+                            <a href="{% url 'perfil:todos_favoritos' usuario.username %}" class="btn-neon-outline">
+                                Ver todos os {{ total_favoritos }} favoritos
+                            </a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="empty-tab-state">
+                        <i class="bi bi-heart-break"></i>
+                        <p>Nenhum favorito adicionado ainda.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- ABA: COMENTÁRIOS -->
+            <div class="tab-pane fade" id="comentarios" role="tabpanel">
+                {% if comentarios_recentes %}
+                    <div class="comments-feed">
+                        {% for coment in comentarios_recentes %}
+                            <div class="comment-item">
+                                <div class="comment-anime-ref">
+                                    <a href="{% url 'core:anime_detail' coment.anime_id %}" class="anime-link">
+                                        <i class="bi bi-film"></i> Anime #{{ coment.anime_id }}
+                                    </a>
+                                    <span class="comment-date">{{ coment.criado_em|date:"d M Y, H:i" }}</span>
+                                </div>
+                                
+                                <div class="comment-content-box">
+                                    {% if coment.nota %}
+                                        <div class="user-rating">
+                                            ★ {{ coment.nota }}
+                                        </div>
+                                    {% endif %}
+                                    <p>{{ coment.texto|truncatewords:40 }}</p>
+                                </div>
+                                
+                                <a href="{% url 'core:anime_detail' coment.anime_id %}" class="view-context-btn">
+                                    Ver no Anime <i class="bi bi-arrow-right-short"></i>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if total_comentarios > 5 %}
+                        <div class="view-all-wrapper">
+                            <a href="{% url 'perfil:todos_comentarios' usuario.username %}" class="btn-neon-outline">
+                                Ver todos os {{ total_comentarios }} comentários
+                            </a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="empty-tab-state">
+                        <i class="bi bi-chat-square-dots"></i>
+                        <p>O usuário ainda não comentou em nada.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<style>
+/* --- ANILUMI PROFILE SYSTEM --- */
+:root {
+    --bg-body: #090b10;
+    --bg-card: #151921;
+    --accent: #8e44ad;
+    --accent-glow: rgba(142, 68, 173, 0.5);
+    --cyan-lumi: #00d2d3;
+    --cyan-glow: rgba(0, 210, 211, 0.3);
+    --text-main: #ffffff;
+    --text-sec: #a0aec0;
+    --border-glass: rgba(255, 255, 255, 0.08);
+}
+
+.anilumi-wrapper {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 3rem 0;
+}
+
+.anilumi-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* --- HEADER CARD --- */
+.profile-header-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glass);
+    border-radius: 24px;
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 3rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.profile-cover-glow {
+    position: absolute;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle at 50% 0%, rgba(142, 68, 173, 0.15), transparent 70%);
+    pointer-events: none;
+}
+
+.profile-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+}
+
+/* Avatar */
+.profile-avatar-wrapper {
+    position: relative;
+    width: 140px; height: 140px;
+    flex-shrink: 0;
+}
+.profile-avatar {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--bg-body);
+    position: relative; z-index: 2;
+}
+.avatar-border-glow {
+    position: absolute; inset: -5px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--cyan-lumi));
+    z-index: 1;
+    filter: blur(2px);
+    opacity: 0.8;
+}
+
+/* Info */
+.profile-info { flex-grow: 1; }
+.username { margin: 0; font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; }
+.handle { color: var(--cyan-lumi); font-size: 1rem; font-weight: 500; }
+
+.bio-text { margin: 1rem 0; color: #ccc; line-height: 1.6; max-width: 600px; }
+.bio-text.empty { color: var(--text-sec); font-style: italic; }
+
+.member-since {
+    font-size: 0.85rem; color: var(--text-sec); display: flex; align-items: center; gap: 0.5rem;
+}
+
+.btn-edit-glass {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid var(--border-glass);
+    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    text-decoration: none;
+    transition: 0.3s;
+}
+.btn-edit-glass:hover { background: rgba(255,255,255,0.2); border-color: white; }
+
+/* Stats */
+.profile-stats {
+    display: flex; gap: 2rem;
+    border-left: 1px solid var(--border-glass);
+    padding-left: 2rem;
+}
+.stat-box { display: flex; flex-direction: column; align-items: center; }
+.stat-number { font-size: 1.8rem; font-weight: 800; color: white; }
+.stat-label { font-size: 0.75rem; color: var(--text-sec); text-transform: uppercase; letter-spacing: 1px; }
+
+/* --- TABS --- */
+.custom-tabs-wrapper {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-glass);
+}
+.custom-tabs { border: none; gap: 2rem; }
+.custom-tabs .nav-link {
+    background: transparent; border: none; color: var(--text-sec);
+    padding: 1rem 0; font-size: 1rem; font-weight: 600;
+    position: relative; transition: 0.3s;
+}
+.custom-tabs .nav-link:hover { color: white; }
+.custom-tabs .nav-link.active { color: white; background: transparent; }
+.custom-tabs .nav-link.active::after {
+    content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+    height: 2px; background: linear-gradient(90deg, var(--accent), var(--cyan-lumi));
+    box-shadow: 0 -2px 10px var(--accent-glow);
+}
+
+/* --- TAB CONTENT: FAVORITOS --- */
+.anime-grid-mini {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.5rem;
+}
+.mini-anime-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-glass);
+    transition: 0.3s;
+}
+.mini-anime-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+.card-link-wrapper { text-decoration: none; color: inherit; display: block; }
+
+.mini-poster {
+    width: 100%; aspect-ratio: 2/3;
+    background: #111; position: relative;
+    display: flex; align-items: center; justify-content: center;
+}
+/* Placeholder estilizado caso o objeto 'fav' não tenha imagem direta */
+.poster-placeholder {
+    color: var(--text-sec); text-align: center; font-size: 0.9rem;
+}
+.icon-play {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 2rem; color: white; opacity: 0; transition: 0.3s;
+}
+.mini-anime-card:hover .icon-play { opacity: 1; }
+
+.mini-info { padding: 0.8rem; border-top: 1px solid var(--border-glass); }
+.anime-id { display: block; font-weight: 600; font-size: 0.9rem; color: white; }
+.date-added { font-size: 0.75rem; color: var(--text-sec); }
+
+/* --- TAB CONTENT: COMENTÁRIOS --- */
+.comments-feed { display: flex; flex-direction: column; gap: 1rem; }
+.comment-item {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-glass);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: 0.3s;
+}
+.comment-item:hover { background: rgba(255,255,255,0.04); }
+
+.comment-anime-ref {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 0.8rem;
+}
+.anime-link {
+    color: var(--cyan-lumi); text-decoration: none; font-weight: 600; font-size: 0.9rem;
+}
+.comment-date { font-size: 0.75rem; color: var(--text-sec); }
+
+.comment-content-box { margin-bottom: 1rem; }
+.user-rating {
+    display: inline-block; color: #f1c40f; font-weight: bold; font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+.comment-content-box p { color: #ddd; font-size: 0.95rem; margin: 0; }
+
+.view-context-btn {
+    font-size: 0.8rem; color: var(--text-sec); text-decoration: none;
+    display: inline-flex; align-items: center; transition: 0.2s;
+}
+.view-context-btn:hover { color: white; transform: translateX(5px); }
+
+/* --- COMMON UI --- */
+.empty-tab-state {
+    text-align: center; padding: 4rem;
+    color: var(--text-sec);
+}
+.empty-tab-state i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; display: block; }
+
+.view-all-wrapper { text-align: center; margin-top: 2rem; }
+.btn-neon-outline {
+    display: inline-block;
+    border: 1px solid var(--cyan-lumi);
+    color: var(--cyan-lumi);
+    padding: 0.6rem 1.5rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+.btn-neon-outline:hover {
+    background: rgba(0, 210, 211, 0.1);
+    box-shadow: 0 0 15px var(--cyan-glow);
+}
+
+.text-accent { color: var(--accent); }
+.text-cyan { color: var(--cyan-lumi); }
+
+/* RESPONSIVO */
+@media (max-width: 768px) {
+    .profile-content { flex-direction: column; text-align: center; gap: 1.5rem; }
+    .profile-info { display: flex; flex-direction: column; align-items: center; }
+    .profile-stats { border-left: none; border-top: 1px solid var(--border-glass); padding-left: 0; padding-top: 1.5rem; width: 100%; justify-content: center; }
+    .bio-text { text-align: center; }
+}
+</style>
+{% endblock %}

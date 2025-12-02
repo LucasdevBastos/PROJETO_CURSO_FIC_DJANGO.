@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Meus Favoritos - Anilumi{% endblock %}
+
+{% block content %}
+<!-- Fontes e Ícones -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="anilumi-wrapper">
+    <div class="anilumi-container">
+
+        <!-- CABEÇALHO -->
+        <div class="section-header">
+            <div class="header-info">
+                <h1>
+                    <i class="bi bi-heart-fill text-accent"></i>
+                    Meus <span class="text-gradient">Favoritos</span>
+                </h1>
+                <p>Sua coleção pessoal de animes amados.</p>
+            </div>
+        </div>
+
+        {% if animes_favoritos %}
+            <!-- GRID DE CARDS -->
+            <div class="anime-grid">
+                {% for item in animes_favoritos %}
+                    <article class="anilumi-card">
+                        
+                        <!-- Link envolvendo a área da imagem para melhor UX -->
+                        <a href="{% url 'core:anime_detail' item.favorito.anime_id %}" class="card-media-link">
+                            <div class="card-media">
+                                {% if item.anime.score %}
+                                    <div class="score-badge">★ {{ item.anime.score }}</div>
+                                {% endif %}
+                                
+                                {% if item.anime.images.jpg.large_image_url %}
+                                    <img src="{{ item.anime.images.jpg.large_image_url }}" alt="{{ item.anime.title }}" loading="lazy">
+                                {% elif item.anime.images.jpg.image_url %}
+                                    <img src="{{ item.anime.images.jpg.image_url }}" alt="{{ item.anime.title }}" loading="lazy">
+                                {% else %}
+                                    <div class="no-image">
+                                        <i class="bi bi-image"></i>
+                                    </div>
+                                {% endif %}
+
+                                <!-- Overlay Hover -->
+                                <div class="media-overlay">
+                                    <span class="btn-icon"><i class="bi bi-play-fill"></i></span>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- Conteúdo do Card -->
+                        <div class="card-content">
+                            <div class="card-header-text">
+                                <a href="{% url 'core:anime_detail' item.favorito.anime_id %}" class="title-link">
+                                    <h3 title="{{ item.anime.title }}">{{ item.anime.title|truncatechars:35 }}</h3>
+                                </a>
+                            </div>
+
+                            <!-- Data de Adição -->
+                            <div class="card-meta">
+                                <span class="meta-item">
+                                    <i class="bi bi-calendar-heart"></i> Adicionado em {{ item.favorito.criado_em|date:"d/m/Y" }}
+                                </span>
+                            </div>
+
+                            <!-- Botão de Ação -->
+                            <div class="card-footer">
+                                <a href="{% url 'core:anime_detail' item.favorito.anime_id %}" class="btn-glass-full">
+                                    Ver Detalhes
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- EMPTY STATE -->
+            <div class="empty-state-glass">
+                <div class="icon-box"><i class="bi bi-heart-break"></i></div>
+                <h3>Sua lista de favoritos está vazia</h3>
+                <p>Explore o catálogo e clique no coração para salvar seus animes preferidos aqui.</p>
+                <a href="{% url 'landing' %}" class="btn-neon mt-4">
+                    Explorar Animes <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<style>
+/* --- ANILUMI DESIGN SYSTEM (Favoritos) --- */
+:root {
+    --bg-body: #090b10;
+    --bg-card: #151921;
+    --accent: #8e44ad;       
+    --accent-glow: rgba(142, 68, 173, 0.4);
+    --cyan-lumi: #00d2d3;
+    --text-main: #ffffff;
+    --text-sec: #a0aec0;
+    --border-glass: rgba(255, 255, 255, 0.08);
+}
+
+.anilumi-wrapper {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 3rem 0;
+}
+
+.anilumi-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* --- HEADER --- */
+.section-header {
+    border-bottom: 1px solid var(--border-glass);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.header-info h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+.header-info p {
+    color: var(--text-sec);
+    margin: 0.5rem 0 0 0;
+}
+
+.text-accent { color: var(--accent); }
+.text-gradient {
+    background: linear-gradient(90deg, #fff, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* --- GRID SYSTEM --- */
+.anime-grid {
+    display: grid;
+    /* Grid responsivo: cards com largura mínima de 240px */
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 2rem;
+}
+
+/* --- CARD DESIGN --- */
+.anilumi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glass);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+}
+
+.anilumi-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Mídia / Imagem */
+.card-media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 2/3;
+    overflow: hidden;
+    background: #111;
+}
+
+.card-media img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.anilumi-card:hover .card-media img {
+    transform: scale(1.05);
+    filter: brightness(0.7);
+}
+
+.no-image {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3rem; color: #333;
+}
+
+.score-badge {
+    position: absolute; top: 10px; left: 10px;
+    background: rgba(0,0,0,0.8); color: #f1c40f;
+    padding: 4px 8px; border-radius: 6px;
+    font-weight: 700; font-size: 0.8rem;
+    z-index: 2; backdrop-filter: blur(4px);
+}
+
+.media-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: 0.3s;
+}
+.anilumi-card:hover .media-overlay { opacity: 1; }
+
+.btn-icon {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: var(--accent); color: white;
+    font-size: 1.5rem; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* Conteúdo */
+.card-content {
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.card-header-text h3 {
+    font-size: 1rem; font-weight: 600; margin: 0; line-height: 1.4; color: var(--text-main);
+}
+.title-link { text-decoration: none; color: inherit; transition: 0.2s; }
+.title-link:hover { color: var(--cyan-lumi); }
+
+.card-meta {
+    margin-top: 0.8rem; margin-bottom: 1rem;
+}
+.meta-item {
+    font-size: 0.75rem; color: var(--text-sec);
+    display: flex; align-items: center; gap: 0.4rem;
+}
+
+/* Footer do Card */
+.card-footer {
+    margin-top: auto;
+}
+
+.btn-glass-full {
+    display: block;
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border-glass);
+    color: var(--text-sec);
+    text-align: center;
+    padding: 0.6rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: 0.3s;
+}
+.btn-glass-full:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+/* --- EMPTY STATE --- */
+.empty-state-glass {
+    text-align: center; padding: 5rem 1rem;
+    background: rgba(255,255,255,0.02);
+    border-radius: 20px;
+    border: 1px dashed var(--border-glass);
+}
+.icon-box {
+    font-size: 4rem; color: var(--text-sec); margin-bottom: 1.5rem; opacity: 0.5;
+}
+.empty-state-glass h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+.empty-state-glass p { color: var(--text-sec); max-width: 500px; margin: 0 auto; }
+
+.btn-neon {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: var(--cyan-lumi); color: #000;
+    padding: 0.8rem 2rem; border-radius: 50px;
+    font-weight: 700; text-decoration: none;
+    transition: 0.3s;
+}
+.btn-neon:hover {
+    box-shadow: 0 0 20px rgba(0, 210, 211, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .anilumi-container { padding: 0 1rem; }
+    .header-info h1 { font-size: 1.5rem; }
+    .anime-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+}
+</style>
+{% endblock %}

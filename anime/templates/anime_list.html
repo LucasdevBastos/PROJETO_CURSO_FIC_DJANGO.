@@ -1,218 +1,482 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<div class="container">
+<!-- Import da Fonte e Ícones (caso não estejam no base.html) -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-  <!-- Cabeçalho -->
-  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
-    <div>
-      <h1 class="h3 mb-1 text-white">
-        <i class="bi bi-collection-play me-1"></i>
-        Animes cadastrados
-      </h1>
-      <p class="text-secondary mb-0">
-        Listagem em cards, carregando os dados direto do banco.
-      </p>
-    </div>
-    <div class="text-md-end">
-      {% if request.user.is_authenticated %}
-        <span class="badge bg-success">
-          Logado como: {{ request.user.username }}
-        </span>
-      {% else %}
-        <span class="badge bg-secondary">
-          Visitante
-        </span>
-      {% endif %}
-    </div>
-  </div>
+<div class="anilumi-wrapper">
+    <div class="anilumi-container">
 
-  <!-- Se não tiver nenhum anime -->
-  {% if not animes %}
-    <div class="alert alert-warning border-0">
-      Nenhum anime cadastrado ainda.  
-      <span class="text-muted small d-block">
-        Assim que você criar alguns registros no admin, eles vão aparecer aqui.
-      </span>
-    </div>
-  {% endif %}
-
-  <!-- Grid de cards (BANCO) -->
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4">
-    {% for anime in animes %}
-      <div class="col">
-        <div class="card card-anime h-100">
-          {% if anime.imagem_url %}
-            <img src="{{ anime.imagem_url }}" class="card-img-top card-anime-img" alt="{{ anime.titulo }}">
-          {% else %}
-            <div class="bg-secondary d-flex align-items-center justify-content-center card-anime-img">
-              <span class="text-white-50 small">Sem imagem</span>
+        <!-- ============================================= -->
+        <!-- CABEÇALHO: Minha Coleção (Banco de Dados)    -->
+        <!-- ============================================= -->
+        <div class="section-header">
+            <div class="header-info">
+                <h1>
+                    <i class="bi bi-collection-play-fill text-accent"></i>
+                    Animes <span class="text-gradient">Cadastrados</span>
+                </h1>
+                <p>Gerenciamento da sua coleção pessoal.</p>
             </div>
-          {% endif %}
-
-          <div class="card-body d-flex flex-column">
-            <!-- Título -->
-            <h5 class="card-title mb-1 text-white">
-              {{ anime.titulo }}
-            </h5>
-            {% if anime.titulo_ingles %}
-              <p class="card-subtitle mb-2 text-secondary small">
-                {{ anime.titulo_ingles }}
-              </p>
-            {% endif %}
-
-            <!-- Badges -->
-            <div class="mb-2">
-              <span class="badge badge-outline rounded-pill me-1">
-                {{ anime.get_tipo_display }}
-              </span>
-              <span class="badge badge-outline rounded-pill me-1">
-                {{ anime.get_status_display }}
-              </span>
-              {% if anime.temporada %}
-                <span class="badge bg-info rounded-pill">
-                  {{ anime.temporada.get_estacao_display }} {{ anime.temporada.ano }}
-                </span>
-              {% endif %}
+            
+            <div class="user-status">
+                {% if request.user.is_authenticated %}
+                    <div class="status-badge online">
+                        <i class="bi bi-person-circle"></i> {{ request.user.username }}
+                    </div>
+                {% else %}
+                    <div class="status-badge offline">
+                        <i class="bi bi-person-x"></i> Visitante
+                    </div>
+                {% endif %}
             </div>
+        </div>
 
-            <!-- Sinopse -->
-            {% if anime.sinopse %}
-              <p class="card-text text-secondary small mb-2">
-                {{ anime.sinopse|truncatechars:180 }}
-              </p>
-            {% endif %}
+        <!-- Empty State (Banco) -->
+        {% if not animes %}
+            <div class="empty-state-glass">
+                <div class="icon-box"><i class="bi bi-folder-plus"></i></div>
+                <h3>Nenhum anime encontrado</h3>
+                <p>Sua coleção está vazia. Adicione novos títulos pelo painel administrativo.</p>
+            </div>
+        {% endif %}
 
-            <!-- Gêneros -->
-            <div class="mb-2">
-              <small class="text-secondary d-block mb-1">Gêneros:</small>
-              {% if anime.generos.exists %}
-                {% for g in anime.generos.all %}
-                  <span class="badge bg-secondary me-1 mb-1">{{ g.nome }}</span>
+        <!-- GRID DE CARDS (Banco) -->
+        <div class="anime-grid">
+            {% for anime in animes %}
+            <a href="{% url 'core:anime_detail' anime.mal_id %}" style="text-decoration: none; color: inherit;">
+                <article class="anilumi-card">
+                    <!-- Poster / Imagem -->
+                    <div class="card-media">
+                        {% if anime.nota_mal %}
+                            <div class="score-badge">★ {{ anime.nota_mal }}</div>
+                        {% endif %}
+                        
+                        {% if anime.imagem_url %}
+                            <img src="{{ anime.imagem_url }}" alt="{{ anime.titulo }}" loading="lazy">
+                        {% else %}
+                            <div class="no-image">
+                                <i class="bi bi-image"></i>
+                            </div>
+                        {% endif %}
+
+                        <!-- Overlay Hover -->
+                        <div class="media-overlay">
+                            <button class="btn-icon"><i class="bi bi-pencil-square"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Conteúdo do Card -->
+                    <div class="card-content">
+                        <div class="card-header-text">
+                            <h3 title="{{ anime.titulo }}">{{ anime.titulo|truncatechars:25 }}</h3>
+                            {% if anime.titulo_ingles %}
+                                <small>{{ anime.titulo_ingles|truncatechars:30 }}</small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Tags / Badges -->
+                        <div class="card-tags">
+                            <span class="tag tag-outline">{{ anime.get_tipo_display }}</span>
+                            <span class="tag tag-outline">{{ anime.get_status_display }}</span>
+                            {% if anime.temporada %}
+                                <span class="tag tag-filled">{{ anime.temporada.get_estacao_display }} {{ anime.temporada.ano }}</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Sinopse (Com clamp de linhas) -->
+                        {% if anime.sinopse %}
+                            <p class="card-synopsis">{{ anime.sinopse|striptags|truncatechars:120 }}</p>
+                        {% endif %}
+
+                        <!-- Footer do Card -->
+                        <div class="card-footer">
+                            <div class="footer-stat">
+                                <i class="bi bi-star-fill text-warning"></i> 
+                                <span>{{ anime.nota_mal|default:"-" }}</span>
+                            </div>
+                            <div class="footer-stat">
+                                <i class="bi bi-bar-chart-fill text-accent"></i>
+                                <span>{{ anime.popularidade_score|default:"N/A" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- Divisor Neon -->
+        <div class="neon-divider"></div>
+
+        <!-- ============================================= -->
+        <!-- SEÇÃO: Jikan API (MyAnimeList)               -->
+        <!-- ============================================= -->
+        <div class="section-header">
+            <div class="header-info">
+                <h2>
+                    <i class="bi bi-cloud-download-fill text-cyan"></i>
+                    Temporada <span class="text-gradient-cyan">Atual</span>
+                </h2>
+                <p>Dados em tempo real via Jikan API (MAL).</p>
+            </div>
+        </div>
+
+        {% if animes_mal %}
+            <div class="anime-grid">
+                {% for anime in animes_mal %}
+                <a href="{% url 'core:anime_detail' anime.mal_id %}" style="text-decoration: none; color: inherit;">
+                    <article class="anilumi-card glass-variant">
+                        <div class="card-media">
+                            {% if anime.nota_mal %}
+                                <div class="score-badge mal-style">MAL {{ anime.nota_mal }}</div>
+                            {% endif %}
+                            
+                            {% if anime.imagem_url %}
+                                <img src="{{ anime.imagem_url }}" alt="{{ anime.titulo }}" loading="lazy">
+                            {% else %}
+                                <div class="no-image"><i class="bi bi-image"></i></div>
+                            {% endif %}
+                        </div>
+
+                        <div class="card-content">
+                            <div class="card-header-text">
+                                <h3 title="{{ anime.titulo }}">{{ anime.titulo|truncatechars:25 }}</h3>
+                                {% if anime.titulo_ingles %}
+                                    <small>{{ anime.titulo_ingles|truncatechars:30 }}</small>
+                                {% endif %}
+                            </div>
+
+                            <div class="card-tags">
+                                {% if anime.episodios %}
+                                    <span class="tag tag-outline">{{ anime.episodios }} eps</span>
+                                {% endif %}
+                                {% if anime.year %}
+                                    <span class="tag tag-outline">{{ anime.year }}</span>
+                                {% endif %}
+                            </div>
+
+                            {% if anime.sinopse %}
+                                <p class="card-synopsis">{{ anime.sinopse|striptags|truncatechars:100 }}</p>
+                            {% endif %}
+
+                            <div class="card-footer">
+                                <span class="source-tag"><i class="bi bi-link-45deg"></i> MyAnimeList</span>
+                                <div class="footer-stat">
+                                    <i class="bi bi-star-fill text-warning"></i> {{ anime.nota_mal|default:"-" }}
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </a>
                 {% endfor %}
-              {% else %}
-                <span class="text-secondary small">Nenhum gênero cadastrado</span>
-              {% endif %}
             </div>
-
-            <!-- Nota e popularidade -->
-            <div class="mt-auto pt-2 border-top border-secondary-subtle">
-              <div class="d-flex justify-content-between small text-secondary">
-                <span>
-                  <i class="bi bi-star-fill text-warning me-1"></i>
-                  Nota MAL:
-                  <strong class="text-light">
-                    {{ anime.nota_mal|default:"-" }}
-                  </strong>
-                </span>
-                <span>
-                  <i class="bi bi-graph-up-arrow me-1"></i>
-                  Pop:
-                  <strong class="text-light">
-                    {{ anime.popularidade_score }}
-                  </strong>
-                </span>
-              </div>
+        {% else %}
+            <div class="error-state">
+                <i class="bi bi-exclamation-triangle"></i>
+                <p>Não foi possível carregar os dados da API. Verifique o console.</p>
             </div>
-          </div>
+        {% endif %}
 
-        </div>
-      </div>
-    {% endfor %}
-  </div>
-
-
-  <!-- ============================================= -->
-  <!-- Animes da MyAnimeList (via Jikan API)        -->
-  <!-- ============================================= -->
-  <hr class="my-5">
-
-  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
-    <div>
-      <h2 class="h4 mb-1 text-white">
-        <i class="bi bi-cloud-arrow-down me-1"></i>
-        Animes da temporada atual (MyAnimeList)
-      </h2>
-      <p class="text-secondary mb-0 small">
-        Dados carregados ao vivo da Jikan API: <code>/v4/seasons/now</code>
-      </p>
     </div>
-  </div>
-
-  {% if animes_mal %}
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4">
-      {% for anime in animes_mal %}
-        <div class="col">
-          <div class="card card-anime h-100">
-            {% if anime.imagem_url %}
-              <img src="{{ anime.imagem_url }}" class="card-img-top card-anime-img" alt="{{ anime.titulo }}">
-            {% else %}
-              <div class="bg-secondary d-flex align-items-center justify-content-center card-anime-img">
-                <span class="text-white-50 small">Sem imagem</span>
-              </div>
-            {% endif %}
-
-            <div class="card-body d-flex flex-column">
-              <!-- Título -->
-              <h5 class="card-title mb-1 text-white">
-                {{ anime.titulo }}
-              </h5>
-              {% if anime.titulo_ingles %}
-                <p class="card-subtitle mb-2 text-secondary small">
-                  {{ anime.titulo_ingles }}
-                </p>
-              {% endif %}
-
-              <!-- Season / Ano / Episódios -->
-              <div class="mb-2">
-                {% if anime.season or anime.year %}
-                  <span class="badge badge-outline rounded-pill me-1">
-                    {{ anime.season|default:"?" }} {{ anime.year|default:"" }}
-                  </span>
-                {% endif %}
-                {% if anime.episodios %}
-                  <span class="badge badge-outline rounded-pill me-1">
-                    {{ anime.episodios }} eps
-                  </span>
-                {% endif %}
-              </div>
-
-              <!-- Sinopse -->
-              {% if anime.sinopse %}
-                <p class="card-text text-secondary small mb-2">
-                  {{ anime.sinopse|truncatechars:180 }}
-                </p>
-              {% endif %}
-
-              <!-- Nota -->
-              <div class="mt-auto pt-2 border-top border-secondary-subtle">
-                <div class="d-flex justify-content-between small text-secondary">
-                  <span>
-                    <i class="bi bi-star-fill text-warning me-1"></i>
-                    Nota MAL:
-                    <strong class="text-light">
-                      {{ anime.nota_mal|default:"-" }}
-                    </strong>
-                  </span>
-                  <span class="text-secondary small">
-                    Via MyAnimeList
-                  </span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      {% endfor %}
-    </div>
-  {% else %}
-    <div class="alert alert-danger border-0">
-      Não foi possível carregar os animes da MyAnimeList ainda.
-      <span class="d-block small text-muted">
-        Verifique o console do servidor (terminal) para ver se houve erro na chamada da Jikan API.
-      </span>
-    </div>
-  {% endif %}
-
 </div>
+
+<style>
+/* --- ANILUMI DESIGN SYSTEM (Desktop Version) --- */
+:root {
+    --bg-body: #090b10;
+    --bg-card: #151921;
+    --bg-card-hover: #1b202a;
+    --accent: #8e44ad;       
+    --accent-glow: rgba(142, 68, 173, 0.4);
+    --cyan-lumi: #00d2d3;
+    --cyan-glow: rgba(0, 210, 211, 0.4);
+    --text-main: #ffffff;
+    --text-sec: #a0aec0;
+    --border-glass: rgba(255, 255, 255, 0.08);
+}
+
+.anilumi-wrapper {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.anilumi-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* --- HEADER --- */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border-glass);
+    padding-bottom: 1.5rem;
+}
+
+.header-info h1, .header-info h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.header-info p {
+    color: var(--text-sec);
+    margin: 0.5rem 0 0 0;
+    font-size: 0.95rem;
+}
+
+.text-accent { color: var(--accent); }
+.text-cyan { color: var(--cyan-lumi); }
+.text-warning { color: #f1c40f; }
+
+.text-gradient {
+    background: linear-gradient(90deg, #fff, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.text-gradient-cyan {
+    background: linear-gradient(90deg, #fff, var(--cyan-lumi));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* --- BADGES USER --- */
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-badge.online {
+    background: rgba(46, 204, 113, 0.1);
+    color: #2ecc71;
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.status-badge.offline {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-sec);
+    border: 1px solid var(--border-glass);
+}
+
+/* --- GRID SYSTEM --- */
+.anime-grid {
+    display: grid;
+    /* Grid responsivo automático: cria quantas colunas couberem com mín 280px */
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 2rem;
+}
+
+/* --- CARD DESIGN --- */
+.anilumi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glass);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+}
+
+.anilumi-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Imagem */
+.card-media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 2/3; /* Formato Poster padrão */
+    overflow: hidden;
+    background: #111;
+}
+
+.card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.anilumi-card:hover .card-media img {
+    transform: scale(1.05);
+    filter: brightness(0.7);
+}
+
+.no-image {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3rem; color: #333;
+}
+
+/* Badge de Nota flutuante */
+.score-badge {
+    position: absolute;
+    top: 10px; left: 10px;
+    background: rgba(0,0,0,0.8);
+    color: #f1c40f;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    z-index: 2;
+    backdrop-filter: blur(4px);
+}
+.score-badge.mal-style {
+    background: #2e51a2;
+    color: white;
+}
+
+/* Botão hover sobre imagem */
+.media-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: 0.3s;
+}
+.anilumi-card:hover .media-overlay { opacity: 1; }
+
+.btn-icon {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 0 15px var(--accent-glow);
+    display: flex; align-items: center; justify-content: center;
+}
+
+/* Corpo do Card */
+.card-content {
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.card-header-text h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.2rem 0;
+    line-height: 1.4;
+    color: var(--text-main);
+}
+.card-header-text small {
+    display: block;
+    color: var(--text-sec);
+    font-size: 0.75rem;
+    margin-bottom: 0.8rem;
+}
+
+/* Tags */
+.card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.tag {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+.tag-outline {
+    border: 1px solid var(--border-glass);
+    color: var(--text-sec);
+}
+.tag-filled {
+    background: rgba(142, 68, 173, 0.2);
+    color: #d2a4e9;
+    border: 1px solid rgba(142, 68, 173, 0.3);
+}
+
+/* Sinopse */
+.card-synopsis {
+    font-size: 0.8rem;
+    color: #888;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    flex-grow: 1; /* Empurra o footer para baixo */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Footer do Card */
+.card-footer {
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-glass);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--text-sec);
+}
+.source-tag { font-size: 0.75rem; opacity: 0.7; }
+
+/* --- STATES (Empty / Error) --- */
+.empty-state-glass {
+    text-align: center;
+    padding: 4rem;
+    background: rgba(255,255,255,0.02);
+    border-radius: 20px;
+    border: 1px dashed var(--border-glass);
+}
+.icon-box {
+    font-size: 3rem;
+    color: var(--text-sec);
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.error-state {
+    text-align: center;
+    padding: 3rem;
+    background: rgba(231, 76, 60, 0.1);
+    border-radius: 16px;
+    color: #e74c3c;
+    border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.neon-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-glass), transparent);
+    margin: 4rem 0;
+}
+
+/* Responsividade Básica (ajustes finais) */
+@media (max-width: 768px) {
+    .anilumi-container { padding: 0 1rem; }
+    .header-info h1 { font-size: 1.5rem; }
+    .anime-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); } /* Cards menores em mobile */
+    .card-synopsis { display: none; } /* Ocultar sinopse em telas pequenas para limpar */
+}
+</style>
 {% endblock %}
