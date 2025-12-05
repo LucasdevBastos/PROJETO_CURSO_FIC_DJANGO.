@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "calendar_app",
     "comentarios",
     "core",
+    "perfil",
     "users",
 ]
 
