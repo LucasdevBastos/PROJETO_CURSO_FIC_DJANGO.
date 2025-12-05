@@ -154,7 +154,16 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# Configuração do WhiteNoise para produção
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# Configurações do WhiteNoise
+WHITENOISE_AUTOREFRESH = DEBUG  # Auto-refresh apenas em desenvolvimento
+WHITENOISE_USE_FINDERS = DEBUG  # Usa finders apenas em desenvolvimento
+
+# Cria o diretório staticfiles se não existir (evita warnings)
+import os
+os.makedirs(STATIC_ROOT, exist_ok=True)
 
 
 # ======================
