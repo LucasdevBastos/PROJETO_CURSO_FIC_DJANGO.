@@ -2,378 +2,504 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AniTime | Calendário da Temporada</title>
-
-    <!-- Bootstrap / Icons / Font -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AniLumi | Kaiju Season</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
     <style>
         :root {
-            --primary: #a855f7; /* Roxo Vibrante */
-            --primary-hover: #9333ea;
+            --primary: #8b5cf6; /* Roxo vibrante */
+            --primary-hover: #7c3aed;
             --dark-bg: #0a0a0a;
             --card-bg: #171717;
             --text-main: #ffffff;
             --text-sec: #d4d4d4;
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
 
         body {
+            font-family: 'Poppins', sans-serif;
             background-color: var(--dark-bg);
             color: var(--text-main);
-            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent; /* Remove flash azul no clique em mobile */
         }
 
-        /* Navbar Transparente com Blur */
+        /* --- HEADER PROFISSIONAL --- */
         .navbar {
+            padding: 1rem 0;
+            transition: all 0.4s ease;
+            z-index: 1000;
+        }
+
+        /* Estado inicial (Transparente com gradiente) */
+        .navbar-glass {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+        }
+
+        /* Estado rolado (Vidro) */
+        .navbar.scrolled {
             background: rgba(10, 10, 10, 0.85);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 0.8rem 0;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
         }
 
         .navbar-brand {
-            font-weight: 700;
-            letter-spacing: -0.5px;
+            font-weight: 800;
             font-size: 1.5rem;
+            letter-spacing: -0.5px;
+            color: white !important;
         }
 
-        /* Hero Section Imersiva */
+        .nav-link {
+            color: rgba(255,255,255,0.7) !important;
+            font-weight: 500;
+            margin: 0 10px;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white !important;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0; height: 2px;
+            bottom: 0; left: 50%;
+            background-color: var(--primary);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        .nav-link:hover::after { width: 100%; }
+
+        /* Avatar do Usuário */
+        .user-avatar-btn {
+            width: 38px; height: 38px;
+            padding: 0;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.2);
+            transition: 0.3s;
+            cursor: pointer;
+            background: transparent;
+        }
+        .user-avatar-btn:active { transform: scale(0.95); } /* Feedback tátil */
+        
+        .user-avatar-img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+
+        /* Dropdown customizado */
+        .custom-dropdown {
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            margin-top: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .dropdown-header {
+            color: white !important;
+            font-weight: 600;
+            padding: 12px 20px;
+            font-size: 0.95rem;
+        }
+        .dropdown-item {
+            color: #ccc;
+            padding: 12px 20px; /* Mais área de toque */
+        }
+        .dropdown-item:hover {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--primary);
+        }
+
+        /* --- HERO SECTION --- */
         .hero {
             position: relative;
-            height: 80vh;
+            height: 100vh;
+            min-height: 650px;
             display: flex;
             align-items: center;
-            background: url('https://images4.alphacoders.com/136/thumb-1920-1368242.png') no-repeat center center/cover;
+            background-image: url('https://images4.alphacoders.com/136/thumb-1920-1368242.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center top; /* Padrão Desktop */
         }
 
-        /* Gradiente sobre a imagem para ler o texto */
         .hero::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(to right, rgba(10,10,10, 0.95) 0%, rgba(10,10,10, 0.6) 50%, transparent 100%);
+            inset: 0;
+            background: linear-gradient(90deg, #0a0a0a 0%, rgba(10,10,10,0.85) 45%, rgba(10,10,10,0.1) 100%);
+            z-index: 1;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 150px;
+            background: linear-gradient(to top, var(--dark-bg), transparent);
+            z-index: 1;
         }
 
         .hero-content {
             position: relative;
             z-index: 2;
+            padding-top: 80px;
         }
 
-        .btn-cta {
-            background-color: var(--primary);
-            border: none;
-            padding: 12px 35px;
-            font-weight: 600;
-            border-radius: 6px;
+        .hero-title {
+            font-size: 3.5rem;
+            line-height: 1.1;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+        }
+        
+        .text-highlight {
+            color: #3b82f6;
+            display: inline-block;
+        }
+
+        .hero-desc {
+            font-size: 1.1rem;
+            color: #d1d5db;
+            max-width: 550px;
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+
+        /* Botões */
+        .btn-primary-glow, .btn-outline-glow {
+            padding: 15px 40px;
+            font-weight: 700;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .btn-primary-glow {
+            background: var(--primary);
             color: white;
-            transition: all 0.3s;
+            border: none;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
         }
-        .btn-cta:hover {
-            background-color: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+        
+        .btn-primary-glow:hover {
+            background: var(--primary-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 0 35px rgba(139, 92, 246, 0.6);
+            color: white;
         }
 
-        /* Cards de Anime (Estilo Poster) */
+        .btn-outline-glow {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-outline-glow:hover {
+            border-color: white;
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-3px);
+            color: white;
+        }
+
+        /* Feedback de clique nos botões (Mobile feel) */
+        .btn-primary-glow:active, .btn-outline-glow:active {
+            transform: scale(0.98);
+        }
+
+        .season-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid #3b82f6;
+            border-radius: 30px;
+            color: #3b82f6;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            backdrop-filter: blur(5px);
+        }
+
+        /* --- CARDS & SWIPER --- */
         .anime-card {
             position: relative;
-            border-radius: 8px;
+            border-radius: 12px;
             overflow: hidden;
-            transition: transform 0.3s ease;
-            cursor: pointer;
-            aspect-ratio: 2/3; /* Formato Poster */
+            aspect-ratio: 2/3;
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         .anime-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.5s ease;
         }
 
-        .anime-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        @media (min-width: 992px) {
+            .anime-card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+                border-color: var(--primary);
+            }
+            .anime-card:hover img { transform: scale(1.1); }
         }
 
-        .anime-card:hover img {
-            transform: scale(1.05);
-        }
-
-        /* Overlay de Informações no Card */
         .card-overlay {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            padding: 20px 15px;
+            bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 15%, rgba(0,0,0,0.5) 60%, transparent 100%);
+            padding: 60px 12px 12px 12px;
         }
 
         .status-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            padding: 4px 8px;
-            border-radius: 4px;
-            z-index: 2;
+            position: absolute; top: 10px; right: 10px;
+            font-size: 0.7rem; font-weight: 700;
+            padding: 4px 10px; border-radius: 20px;
+            z-index: 2; backdrop-filter: blur(4px);
         }
-        .bg-live { background-color: #ef4444; color: white; } /* Vermelho */
-        .bg-soon { background-color: #f59e0b; color: black; } /* Amarelo */
+        .bg-live { background-color: rgba(239, 68, 68, 0.9); color: white; } 
+        .bg-primary { background-color: var(--primary); color: white; }
+        .bg-warning { background-color: rgba(245, 158, 11, 0.9); }
 
-        /* Seção de Features */
-        .feature-box {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.05);
-            height: 100%;
-        }
-        .feature-icon {
-            font-size: 2rem;
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-
-        .text-sec {
-            color: var(--text-sec);
-        }
-
-        /* Tabs Navigation */
+        /* --- TABS (UX App-like) --- */
         .tabs-container {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             margin-bottom: 30px;
-            border-bottom: 2px solid rgba(255,255,255,0.1);
             overflow-x: auto;
-            padding-bottom: 15px;
+            padding-bottom: 10px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
         }
+        .tabs-container::-webkit-scrollbar { display: none; } /* Chrome/Safari */
 
         .tab-btn {
-            padding: 8px 20px;
-            background: transparent;
-            border: none;
+            padding: 10px 24px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50px;
             color: var(--text-sec);
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
             white-space: nowrap;
             transition: all 0.3s;
-            position: relative;
+            font-size: 0.9rem;
         }
-
-        .tab-btn:hover {
-            color: var(--primary);
-        }
-
         .tab-btn.active {
-            color: var(--primary);
-        }
-
-        .tab-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: -17px;
-            left: 0;
-            right: 0;
-            height: 2px;
             background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
         }
 
-        /* Search Box */
+        /* --- SEARCH BOX --- */
         .search-box {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            max-width: 600px;
+            display: flex; gap: 10px; margin-bottom: 30px;
         }
-
         .search-box input {
             flex: 1;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(168, 85, 247, 0.3);
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.1);
             color: white;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 0.95rem;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 1rem;
             transition: all 0.3s;
         }
-
         .search-box input:focus {
-            outline: none;
-            background: rgba(255,255,255,0.12);
-            border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+            outline: none; border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
         }
-
-        .search-box input::placeholder {
-            color: rgba(255,255,255,0.4);
-        }
-
         .search-box button {
-            background: var(--primary);
-            border: none;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
+            background: var(--primary); border: none; color: white;
+            padding: 0 25px; border-radius: 12px; font-weight: 600;
             transition: all 0.3s;
         }
 
-        .search-box button:hover {
-            background: var(--primary-hover);
-            transform: scale(1.05);
+        /* Swiper Fixes */
+        .swiper { width: 100%; padding-bottom: 40px; padding-top: 10px; }
+        .swiper-pagination-bullet { background: rgba(255,255,255,0.2); opacity: 1; width: 6px; height: 6px; }
+        .swiper-pagination-bullet-active { background: var(--primary); width: 20px; border-radius: 4px; }
+        .swiper-button-next, .swiper-button-prev {
+            color: white; width: 44px; height: 44px;
+            background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);
+            border-radius: 50%; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .swiper-button-next:after, .swiper-button-prev:after { font-size: 18px; }
+
+        /* Tab Animation */
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* =========================================
+           MOBILE UX OPTIMIZATIONS (A Mágica)
+           ========================================= */
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                background: #121212;
+                padding: 1.5rem;
+                border-radius: 16px;
+                margin-top: 15px;
+                border: 1px solid var(--glass-border);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            }
+            .nav-link { margin: 8px 0; font-size: 1.1rem; }
         }
 
-        /* Swiper Customization */
-        .swiper {
-            width: 100%;
-            height: auto;
-            padding-bottom: 50px;
-        }
+        @media (max-width: 768px) {
+            /* 1. Header: Ajuste fino do container para alinhar itens */
+            .navbar .container {
+                padding-left: 20px; padding-right: 20px;
+            }
 
-        .swiper-slide {
-            height: auto;
-            width: 200px;
-        }
+            /* 2. Hero Background: Foca no rosto do Kaiju (80% para direita) */
+            .hero {
+                background-position: 80% center; 
+                height: auto; 
+                min-height: 100vh;
+                padding-bottom: 40px;
+            }
+            
+            /* Gradiente mobile mais forte para leitura */
+            .hero::before {
+                background: linear-gradient(180deg, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.85) 60%, #0a0a0a 100%);
+            }
 
-        .swiper-pagination {
-            bottom: 10px !important;
-        }
+            /* 3. Tipografia Mobile */
+            .hero-content { 
+                padding-top: 110px; /* Mais espaço do topo */
+                text-align: center; 
+            }
+            .hero-title { font-size: 2.4rem; margin-bottom: 1rem; }
+            .hero-desc { font-size: 1rem; margin-bottom: 2.5rem; }
+            .season-badge { margin-top: 0; margin-bottom: 20px; }
 
-        .swiper-pagination-bullet {
-            background: rgba(255,255,255,0.3);
-            opacity: 1;
-        }
+            /* 4. Botões Full Width (Zona do Polegar) */
+            .btn-primary-glow, .btn-outline-glow { 
+                width: 100%; 
+                padding: 16px; /* Botão mais alto para dedo */
+            }
 
-        .swiper-pagination-bullet-active {
-            background: var(--primary);
-        }
+            /* 5. Input Text Size (Evita zoom no iOS) */
+            .search-box input { font-size: 16px; } 
+            .search-box button { padding: 0 18px; }
+            .search-box button span { display: none; } /* Só ícone */
 
-        .swiper-button-next,
-        .swiper-button-prev {
-            color: var(--primary);
-            width: 40px;
-            height: 40px;
-            background: rgba(168, 85, 247, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .swiper-button-next:after,
-        .swiper-button-prev:after {
-            font-size: 18px;
-        }
-
-        .swiper-button-next:hover,
-        .swiper-button-prev:hover {
-            background: rgba(168, 85, 247, 0.4);
-        }
-
-        /* Tab Content */
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
+            /* 6. Swiper Clean */
+            .swiper-button-next, .swiper-button-prev { display: none; } /* Remove setas */
+            .swiper { padding-bottom: 30px; }
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <nav class="navbar navbar-expand-lg fixed-top navbar-glass">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'landing' %}"><i class="fas fa-play text-primary me-2"></i>AniLumi</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link active" href="{% url 'landing' %}">Hoje</a></li>
+            
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'landing' %}">
+                <i class="bi bi-play-circle-fill" style="color: #3b82f6;"></i> AniLumi
+            </a>
+
+            <div class="d-flex align-items-center gap-3 ms-auto order-lg-2">
+                
+                {% if user.is_authenticated %}
+                <div class="dropdown">
+                    <button class="user-avatar-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border: none;">
+                        {% with perfil=user.perfil %}
+                            {% if perfil.avatar %}
+                                <img src="{{ perfil.avatar.url }}" alt="{{ user.username }}" class="user-avatar-img">
+                            {% else %}
+                                <img src="https://i.pravatar.cc/150?img=11" alt="User" class="user-avatar-img">
+                            {% endif %}
+                        {% endwith %}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
+                        <li><span class="dropdown-header text-muted">Olá, {{ user.username }}!</span></li>
+                        <li><a class="dropdown-item" href="{% url 'perfil:ver' user.username %}"><i class="bi bi-person me-2"></i> Meu Perfil</a></li>
+                        <li><a class="dropdown-item" href="{% url 'core:meus_favoritos' %}"><i class="bi bi-heart me-2"></i> Favoritos</a></li>
+                        <li><hr class="dropdown-divider bg-secondary"></li>
+                        <li>
+                            <form method="POST" action="{% url 'users:logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i> Sair</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+                {% else %}
+                <div class="d-flex gap-2 align-items-center">
+                    <a href="{% url 'users:login' %}" class="btn btn-link text-light text-decoration-none fw-bold" style="font-size: 0.9rem;">Entrar</a>
+                </div>
+                {% endif %}
+
+                <button class="navbar-toggler border-0 p-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <i class="bi bi-list text-white fs-1"></i>
+                </button>
+
+            </div>
+
+            <div class="collapse navbar-collapse order-lg-1 justify-content-center" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'landing' %}">Início</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'calendar_app:month_current' %}">Temporada</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'anime:anime_list' %}">Animes</a></li>
-                    {% if not user.is_authenticated %}
-                    <li class="nav-item"><a class="nav-link" href="#">News</a></li>
-                    {% endif %}
-                    <li class="nav-item ms-3">
-                        {% if user.is_authenticated %}
-                            <!-- Menu dropdown do usuário -->
-                            <div class="dropdown">
-                                <button class="btn btn-link btn-sm text-light dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" style="text-decoration: none; padding: 0.25rem 0.5rem;">
-                                    {% with perfil=user.perfil %}
-                                        {% if perfil.avatar %}
-                                            <img 
-                                                src="{{ perfil.avatar.url }}" 
-                                                alt="{{ user.username }}"
-                                                class="rounded-circle"
-                                                style="width: 36px; height: 36px; object-fit: cover; border: 2px solid var(--primary);"
-                                                title="{{ user.username }}"
-                                            >
-                                        {% else %}
-                                            <i class="bi bi-person-circle" style="font-size: 1.3rem;"></i>
-                                        {% endif %}
-                                        <span class="d-none d-md-inline small">{{ user.username }}</span>
-                                    {% endwith %}
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'perfil:ver' user.username %}">
-                                            <i class="bi bi-person"></i> Meu Perfil
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'perfil:editar' %}">
-                                            <i class="bi bi-pencil"></i> Editar Perfil
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'core:meus_favoritos' %}">
-                                            <i class="bi bi-heart"></i> Meus Favoritos
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <form method="POST" action="{% url 'users:logout' %}" style="display: inline;">
-                                            {% csrf_token %}
-                                            <button type="submit" class="dropdown-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
-                                                <i class="bi bi-box-arrow-right"></i> Sair
-                                            </button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </div>
-                        {% else %}
-                            <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-sm px-4 rounded-pill">Entrar</a>
-                        {% endif %}
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'anime:anime_list' %}">Calendário</a></li>
                 </ul>
             </div>
+
         </div>
     </nav>
 
     <section class="hero">
-        <div class="container hero-content">
+        <div class="container">
             <div class="row">
-                <div class="col-lg-6">
-                    <span class="text-uppercase fw-bold text-primary mb-2 d-block tracking-wide">Calendário Sincronizado</span>
-                    <h1 class="display-3 fw-bold mb-4">Não perca o hype da temporada.</h1>
-                    <p class="lead text-sec mb-5">
-                        Acompanhe as datas de lançamento, receba notificações e saiba exatamente onde assistir seus animes favoritos. Tudo ajustado ao seu horário local.
-                    </p>
-                    <div class="d-flex gap-3">
-                        <a href="#agenda" class="btn btn-cta"><i class="fas fa-calendar-alt me-2"></i>Ver Agenda de Hoje</a>
-                        {% if not user.is_authenticated %}
-                        <a href="{% url 'users:register' %}" class="btn btn-outline-light px-4 py-2 rounded-2 fw-bold">Criar Conta</a>
-                        {% endif %}
+                <div class="col-lg-7 col-md-10 mx-auto mx-lg-0">
+                    <div class="hero-content">
+                        
+                        <div class="season-badge">
+                            🔥 Temporada de Outono
+                        </div>
+
+                        <h1 class="hero-title">
+                            Não perca o <br>
+                            <span class="text-highlight">hype</span> da temporada.
+                        </h1>
+
+                        <p class="hero-desc">
+                            Acompanhe datas de lançamento, receba notificações e organize sua lista. Tudo sincronizado com seu fuso horário.
+                        </p>
+
+                        <div class="d-flex flex-column flex-sm-row gap-3">
+                            <a href="#agenda" class="btn-primary-glow">
+                                <i class="bi bi-play-fill fs-4"></i> Começar Agora
+                            </a>
+                            <a href="{% url 'calendar_app:month_current' %}" class="btn-outline-glow">
+                                Ver Calendário
+                            </a>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -382,238 +508,149 @@
 
     <section id="agenda" class="py-5">
         <div class="container">
-            <!-- Barra de Pesquisa -->
-            <div class="mb-5">
-                <h2 class="fw-bold mb-3">Explore Animes</h2>
-                <form method="GET" class="search-box">
-                    <input 
-                        type="text" 
-                        name="q" 
-                        placeholder="Buscar animes..." 
-                        value="{{ search_query }}"
-                    >
-                    <button type="submit"><i class="fas fa-search"></i> Buscar</button>
-                </form>
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-8">
+                    <form method="GET" class="search-box shadow-lg">
+                        <input 
+                            type="text" 
+                            name="q" 
+                            placeholder="Qual anime você procura?" 
+                            value="{{ search_query }}"
+                            autocomplete="off"
+                        >
+                        <button type="submit">
+                            <i class="bi bi-search"></i> <span class="d-none d-sm-inline ms-1">Buscar</span>
+                        </button>
+                    </form>
+                </div>
             </div>
 
-            <!-- Mensagem de Erro na Busca -->
             {% if has_search and error_message %}
-                <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    {{ error_message }}
-                    <a href="{% url 'landing' %}" class="link-warning ms-2">Voltar aos destaques</a>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <div class="alert alert-danger border-0 d-flex align-items-center gap-3 shadow-sm rounded-3 mb-4" role="alert" style="background: rgba(220, 53, 69, 0.1); color: #ff6b6b;">
+                    <i class="fas fa-exclamation-circle fs-4"></i>
+                    <div>{{ error_message }} <a href="{% url 'landing' %}" class="text-white fw-bold ms-2 text-decoration-underline">Limpar busca</a></div>
                 </div>
             {% endif %}
 
-            <!-- SEÇÃO DE RESULTADOS DA BUSCA -->
             {% if has_search and search_results %}
                 <div class="mb-5">
-                    <h3 class="fw-bold mb-3">
-                        <i class="fas fa-search text-primary me-2"></i>
-                        Resultados para "{{ search_query }}"
-                        <span class="text-muted small">({{ search_results|length }} encontrados)</span>
+                    <h3 class="fw-bold mb-4 d-flex align-items-center fs-5">
+                        <span class="badge bg-primary me-3 rounded-circle p-2"><i class="fas fa-search"></i></span>
+                        Resultados: "{{ search_query }}"
                     </h3>
                     
                     <div class="swiper mySearchSwiper">
                         <div class="swiper-wrapper">
                             {% for anime in search_results %}
                                 <div class="swiper-slide">
-                                    <a href="{% url 'core:anime_detail' anime.mal_id %}" style="text-decoration: none; color: inherit;">
-                                        <div class="anime-card">
-                                            {% if anime.images and anime.images.jpg %}
-                                                <img
-                                                    src="{{ anime.images.jpg.large_image_url|default:anime.images.jpg.image_url|default:'https://via.placeholder.com/225x350?text=No+Image' }}"
-                                                    alt="{{ anime.title }}"
-                                                    onerror="this.src='https://via.placeholder.com/225x350?text=No+Image'"
-                                                >
-                                            {% else %}
-                                                <img
-                                                    src="https://via.placeholder.com/225x350?text=No+Image"
-                                                    alt="{{ anime.title }}"
-                                                >
-                                            {% endif %}
-                                            <div class="card-overlay">
-                                                <h5 class="fw-bold mb-1 text-white">{{ anime.title }}</h5>
-                                                {% if anime.score %}
-                                                    <small class="text-sec">⭐ {{ anime.score }}/10</small>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </a>
+                                    {% include "includes/anime_card_slide.html" with anime=anime %}
                                 </div>
                             {% endfor %}
                         </div>
-                        <div class="swiper-button-next"></div>
-                        <div class="swiper-button-prev"></div>
                         <div class="swiper-pagination"></div>
                     </div>
                 </div>
             {% elif has_search and not search_results and not error_message %}
-                <div class="alert alert-info" role="alert">
-                    <i class="fas fa-search me-2"></i>
-                    Nenhum anime encontrado para "<strong>{{ search_query }}</strong>". Tente outro termo!
-                    <a href="{% url 'landing' %}" class="link-info ms-2">Voltar aos destaques</a>
+                <div class="text-center py-5">
+                    <i class="fas fa-ghost fs-1 text-sec mb-3"></i>
+                    <h4 class="text-muted">Nada encontrado para "{{ search_query }}"</h4>
+                    <a href="{% url 'landing' %}" class="btn btn-outline-glow mt-3">Voltar ao Início</a>
                 </div>
             {% endif %}
 
-            <!-- SEÇÕES NORMAIS (se não houver busca) -->
             {% if not has_search %}
 
-                <!-- Abas de Categoria -->
-                <div class="tabs-container">
-                    <button class="tab-btn active" data-tab="today">
-                        <i class="fas fa-calendar me-2"></i>Lançamentos Hoje
-                    </button>
-                    <button class="tab-btn" data-tab="popular">
-                        <i class="fas fa-fire me-2"></i>Populares
-                    </button>
-                    <button class="tab-btn" data-tab="rated">
-                        <i class="fas fa-star me-2"></i>Bem Avaliados
-                    </button>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="fw-bold m-0 fs-3">Explorar</h2>
                 </div>
 
-                <!-- TAB 1: Lançamentos de Hoje -->
+                <div class="tabs-container">
+                    <button class="tab-btn active" data-tab="today"> Hoje</button>
+                    <button class="tab-btn" data-tab="popular"> Populares</button>
+                    <button class="tab-btn" data-tab="rated"> Top Animes</button>
+                </div>
+
                 <div class="tab-content active" id="today-tab">
                     {% if today_schedule %}
                         <div class="swiper mySwiperToday">
                             <div class="swiper-wrapper">
                                 {% for anime in today_schedule %}
                                     <div class="swiper-slide">
-                                        <a href="{% url 'core:anime_detail' anime.mal_id %}" style="text-decoration: none; color: inherit;">
+                                        <a href="{% url 'core:anime_detail' anime.mal_id %}" class="text-decoration-none">
                                             <div class="anime-card">
                                                 {% if anime.broadcast and anime.broadcast.time %}
                                                     <span class="status-badge bg-live">
-                                                        {{ anime.broadcast.time }}
+                                                        <i class="fas fa-clock me-1"></i>{{ anime.broadcast.time }}
                                                     </span>
                                                 {% endif %}
-                                                {% if anime.images and anime.images.jpg %}
-                                                    <img
-                                                        src="{{ anime.images.jpg.large_image_url|default:anime.images.jpg.image_url|default:'https://via.placeholder.com/225x350?text=No+Image' }}"
-                                                        alt="{{ anime.title }}"
-                                                        onerror="this.src='https://via.placeholder.com/225x350?text=No+Image'"
-                                                    >
-                                                {% else %}
-                                                    <img
-                                                        src="https://via.placeholder.com/225x350?text=No+Image"
-                                                        alt="{{ anime.title }}"
-                                                    >
-                                                {% endif %}
+                                                <img src="{{ anime.images.jpg.large_image_url|default:anime.images.jpg.image_url }}" alt="{{ anime.title }}">
                                                 <div class="card-overlay">
-                                                    <h5 class="fw-bold mb-1 text-white">{{ anime.title }}</h5>
-                                                    <small class="text-sec">
-                                                        {% if anime.episodes %}{{ anime.episodes }} eps{% endif %}
-                                                    </small>
+                                                    <h5 class="fw-bold mb-1 text-white text-truncate">{{ anime.title }}</h5>
+                                                    <small class="text-sec">{{ anime.genres.0.name|default:"Anime" }}</small>
                                                 </div>
                                             </div>
                                         </a>
                                     </div>
                                 {% endfor %}
                             </div>
-                            <div class="swiper-button-next"></div>
-                            <div class="swiper-button-prev"></div>
                             <div class="swiper-pagination"></div>
                         </div>
                     {% else %}
-                        <div class="alert alert-secondary" role="alert">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Nenhum lançamento para hoje.
+                        <div class="p-5 text-center bg-dark rounded-3 border border-secondary border-opacity-25">
+                            <p class="text-muted mb-0">Nenhum lançamento hoje.</p>
                         </div>
                     {% endif %}
                 </div>
 
-                <!-- TAB 2: Animes Populares -->
                 <div class="tab-content" id="popular-tab">
                     {% if popular_animes %}
                         <div class="swiper mySwiperPopular">
                             <div class="swiper-wrapper">
                                 {% for anime in popular_animes %}
                                     <div class="swiper-slide">
-                                        <a href="{% url 'core:anime_detail' anime.mal_id %}" style="text-decoration: none; color: inherit;">
+                                        <a href="{% url 'core:anime_detail' anime.mal_id %}" class="text-decoration-none">
                                             <div class="anime-card">
                                                 {% if anime.rank %}
-                                                    <span class="status-badge bg-success">
-                                                        #{{ anime.rank }}
-                                                    </span>
+                                                    <span class="status-badge bg-primary">#{{ anime.rank }}</span>
                                                 {% endif %}
-                                                {% if anime.images and anime.images.jpg %}
-                                                    <img
-                                                        src="{{ anime.images.jpg.large_image_url|default:anime.images.jpg.image_url|default:'https://via.placeholder.com/225x350?text=No+Image' }}"
-                                                        alt="{{ anime.title }}"
-                                                        onerror="this.src='https://via.placeholder.com/225x350?text=No+Image'"
-                                                    >
-                                                {% else %}
-                                                    <img
-                                                        src="https://via.placeholder.com/225x350?text=No+Image"
-                                                        alt="{{ anime.title }}"
-                                                    >
-                                                {% endif %}
+                                                <img src="{{ anime.images.jpg.large_image_url|default:anime.images.jpg.image_url }}" alt="{{ anime.title }}">
                                                 <div class="card-overlay">
-                                                    <h5 class="fw-bold mb-1 text-white">{{ anime.title }}</h5>
-                                                    <small class="text-sec">
-                                                        {% if anime.score %}⭐ {{ anime.score }}/10{% endif %}
-                                                    </small>
+                                                    <h5 class="fw-bold mb-1 text-white text-truncate">{{ anime.title }}</h5>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <small class="text-sec">{{ anime.year|default:"-" }}</small>
+                                                        <small class="text-warning"><i class="fas fa-star"></i> {{ anime.score }}</small>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </a>
                                     </div>
                                 {% endfor %}
                             </div>
-                            <div class="swiper-button-next"></div>
-                            <div class="swiper-button-prev"></div>
                             <div class="swiper-pagination"></div>
-                        </div>
-                    {% else %}
-                        <div class="alert alert-secondary" role="alert">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Nenhum anime popular encontrado.
                         </div>
                     {% endif %}
                 </div>
 
-                <!-- TAB 3: Bem Avaliados -->
                 <div class="tab-content" id="rated-tab">
                     {% if top_rated_animes %}
                         <div class="swiper mySwiperRated">
                             <div class="swiper-wrapper">
                                 {% for anime in top_rated_animes %}
                                     <div class="swiper-slide">
-                                        <a href="{% url 'core:anime_detail' anime.mal_id %}" style="text-decoration: none; color: inherit;">
+                                        <a href="{% url 'core:anime_detail' anime.mal_id %}" class="text-decoration-none">
                                             <div class="anime-card">
-                                                <span class="status-badge bg-warning text-dark">
-                                                    ⭐ {{ anime.score|floatformat:1 }}
-                                                </span>
-                                                {% if anime.images and anime.images.jpg %}
-                                                    <img
-                                                        src="{{ anime.images.jpg.large_image_url|default:anime.images.jpg.image_url|default:'https://via.placeholder.com/225x350?text=No+Image' }}"
-                                                        alt="{{ anime.title }}"
-                                                        onerror="this.src='https://via.placeholder.com/225x350?text=No+Image'"
-                                                    >
-                                                {% else %}
-                                                    <img
-                                                        src="https://via.placeholder.com/225x350?text=No+Image"
-                                                        alt="{{ anime.title }}"
-                                                    >
-                                                {% endif %}
+                                                <span class="status-badge bg-warning text-dark fw-bold">{{ anime.score }}</span>
+                                                <img src="{{ anime.images.jpg.large_image_url|default:anime.images.jpg.image_url }}" alt="{{ anime.title }}">
                                                 <div class="card-overlay">
-                                                    <h5 class="fw-bold mb-1 text-white">{{ anime.title }}</h5>
-                                                    <small class="text-sec">
-                                                        {% if anime.episodes %}{{ anime.episodes }} eps{% endif %}
-                                                    </small>
+                                                    <h5 class="fw-bold mb-1 text-white text-truncate">{{ anime.title }}</h5>
+                                                    <small class="text-sec">{{ anime.episodes|default:"?" }} eps</small>
                                                 </div>
                                             </div>
                                         </a>
                                     </div>
                                 {% endfor %}
                             </div>
-                            <div class="swiper-button-next"></div>
-                            <div class="swiper-button-prev"></div>
                             <div class="swiper-pagination"></div>
-                        </div>
-                    {% else %}
-                        <div class="alert alert-secondary" role="alert">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Nenhum anime bem avaliado encontrado.
                         </div>
                     {% endif %}
                 </div>
@@ -623,205 +660,56 @@
     </section>
 
     <footer class="anilumi-footer">
-        <!-- Glow decorativo superior -->
         <div class="footer-glow-line"></div>
-
         <div class="footer-container">
             <div class="footer-grid">
-                
-                <!-- Coluna 1: Marca e Sobre -->
                 <div class="footer-brand-col">
                     <a href="/" class="footer-logo">Anilumi<span class="dot">.</span></a>
-                    <p class="brand-desc">
-                        Sua plataforma definitiva para descobrir, acompanhar e organizar seus animes favoritos. Feito de fã para fã.
-                    </p>
+                    <p class="brand-desc">Sua plataforma definitiva para descobrir animes.</p>
                     <div class="social-icons">
-                        <a href="#" class="social-link discord" aria-label="Discord"><i class="fab fa-discord"></i></a>
-                        <a href="#" class="social-link twitter" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-link instagram" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-link github" aria-label="Github"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-link discord"><i class="bi bi-discord"></i></a>
+                        <a href="#" class="social-link twitter"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="social-link github"><i class="bi bi-github"></i></a>
                     </div>
                 </div>
-
-                <!-- Coluna 2: Navegação -->
                 <div class="footer-nav-col">
-                    <h4 class="footer-heading">Explorar</h4>
+                    <h4 class="footer-heading">Navegação</h4>
                     <ul class="footer-links">
-                        <li><a href="#agenda">Lançamentos</a></li>
-                        <li><a href="{% url 'anime:anime_list' %}">Catálogo Completo</a></li>
-                        <li><a href="{% url 'calendar_app:month_current' %}">Calendário da Temporada</a></li>
-                        <li><a href="#">Em Alta</a></li>
+                        <li><a href="{% url 'landing' %}">Início</a></li>
+                        <li><a href="{% url 'calendar_app:month_current' %}">Temporada</a></li>
+                        <li><a href="{% url 'anime:anime_list' %}">Calendário</a></li>
                     </ul>
                 </div>
-
-                <!-- Coluna 3: Comunidade -->
-                <div class="footer-nav-col">
-                    <h4 class="footer-heading">Comunidade</h4>
-                    <ul class="footer-links">
-                        <li><a href="#">Fórum de Discussão</a></li>
-                        <li><a href="#">Diretrizes</a></li>
-                        <li><a href="#">Equipe</a></li>
-                        <li><a href="#">Apoie o Projeto</a></li>
-                    </ul>
-                </div>
-
-                <!-- Coluna 4: Newsletter -->
-                <div class="footer-newsletter-col">
-                    <h4 class="footer-heading">Fique Atualizado</h4>
-                    <p class="newsletter-desc">Receba notificações de lançamentos e novidades.</p>
-                    <form class="newsletter-form" onsubmit="event.preventDefault();">
-                        <div class="input-wrapper">
-                            <i class="bi bi-envelope"></i>
-                            <input type="email" placeholder="Seu melhor e-mail">
-                        </div>
-                        <button type="submit" class="btn-subscribe">
-                            <i class="bi bi-send-fill"></i>
-                        </button>
-                    </form>
-                </div>
-
             </div>
-
-            <!-- Rodapé Inferior -->
             <div class="footer-bottom">
-                <p class="copyright">&copy; 2025 Anilumi Project. Todos os direitos reservados.</p>
-                <div class="legal-links">
-                    <a href="#">Política de Privacidade</a>
-                    <span class="separator">•</span>
-                    <a href="#">Termos de Uso</a>
-                </div>
+                <p class="copyright">&copy; 2025 Anilumi. Todos os direitos reservados.</p>
             </div>
         </div>
     </footer>
 
     <style>
-    /* --- ANILUMI FOOTER STYLES --- */
-    .anilumi-footer {
-        background-color: #050608; /* Um tom mais escuro que o body normal */
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        padding: 4rem 0 2rem;
-        position: relative;
-        color: #a0aec0;
-        font-family: 'Inter', sans-serif;
-        margin-top: auto; /* Empurra para baixo se o conteúdo for curto */
-    }
-
-    .footer-container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 0 2rem;
-    }
-
-    /* Glow Line Superior */
-    .footer-glow-line {
-        position: absolute;
-        top: 0; left: 50%; transform: translateX(-50%);
-        width: 60%; height: 1px;
-        background: linear-gradient(90deg, transparent, #8e44ad, #00d2d3, transparent);
-        box-shadow: 0 0 15px rgba(0, 210, 211, 0.4);
-    }
-
-    /* Grid Layout */
-    .footer-grid {
-        display: grid;
-        grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
-        gap: 3rem;
-        margin-bottom: 3rem;
-    }
-
-    /* Coluna Marca */
-    .footer-logo {
-        font-size: 1.8rem; font-weight: 800; color: #fff;
-        text-decoration: none; margin-bottom: 1rem; display: inline-block;
-        letter-spacing: -0.5px;
-    }
-    .footer-logo .dot { color: #00d2d3; }
-
-    .brand-desc {
-        font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem; color: #718096;
-        max-width: 300px;
-    }
-
-    /* Ícones Sociais */
-    .social-icons { display: flex; gap: 0.8rem; }
-    .social-link {
-        width: 40px; height: 40px; border-radius: 10px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        display: flex; align-items: center; justify-content: center;
-        color: #fff; text-decoration: none; transition: 0.3s;
-        font-size: 1.1rem;
-    }
-    .social-link:hover { transform: translateY(-3px); }
-    .social-link.discord:hover { background: #5865F2; border-color: #5865F2; }
-    .social-link.twitter:hover { background: #1DA1F2; border-color: #1DA1F2; }
-    .social-link.instagram:hover { background: #E1306C; border-color: #E1306C; }
-    .social-link.github:hover { background: #333; border-color: #fff; }
-
-    /* Links de Navegação */
-    .footer-heading {
-        color: #fff; font-size: 1.1rem; font-weight: 700; margin-bottom: 1.2rem;
-    }
-
-    .footer-links { list-style: none; padding: 0; margin: 0; }
-    .footer-links li { margin-bottom: 0.8rem; }
-    .footer-links a {
-        color: #a0aec0; text-decoration: none; font-size: 0.95rem;
-        transition: 0.2s; position: relative;
-    }
-    .footer-links a:hover { color: #00d2d3; padding-left: 5px; }
-
-    /* Newsletter */
-    .newsletter-desc { font-size: 0.9rem; margin-bottom: 1rem; color: #718096; }
-    .newsletter-form {
-        display: flex; position: relative; max-width: 100%;
-    }
-    .newsletter-form .input-wrapper {
-        position: relative; width: 100%;
-    }
-    .newsletter-form .input-wrapper i {
-        position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
-        color: #718096;
-    }
-    .newsletter-form input {
-        width: 100%; padding: 0.8rem 1rem 0.8rem 2.8rem;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 8px; color: #fff; outline: none; transition: 0.3s;
-        border-top-right-radius: 0; border-bottom-right-radius: 0;
-    }
-    .newsletter-form input:focus {
-        border-color: #00d2d3; background: rgba(0, 0, 0, 0.3);
-    }
-    .btn-subscribe {
-        background: #00d2d3; border: none;
-        border-top-right-radius: 8px; border-bottom-right-radius: 8px;
-        padding: 0 1.2rem; color: #000; font-size: 1.1rem; cursor: pointer;
-        transition: 0.3s;
-    }
-    .btn-subscribe:hover { background: #00ffff; box-shadow: 0 0 15px rgba(0, 210, 211, 0.4); }
-
-    /* Rodapé Inferior */
-    .footer-bottom {
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        padding-top: 2rem;
-        display: flex; justify-content: space-between; align-items: center;
-        font-size: 0.85rem;
-    }
-    .legal-links a { color: #718096; text-decoration: none; transition: 0.2s; }
-    .legal-links a:hover { color: #fff; }
-    .separator { margin: 0 0.5rem; color: rgba(255,255,255,0.1); }
-
-    /* Responsividade */
-    @media (max-width: 992px) {
-        .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
-    }
-    @media (max-width: 576px) {
-        .footer-grid { grid-template-columns: 1fr; text-align: center; }
+    /* Footer Styles */
+    .anilumi-footer { background-color: #050608; border-top: 1px solid rgba(255, 255, 255, 0.05); padding: 3rem 0 2rem; position: relative; margin-top: auto; }
+    .footer-container { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; }
+    .footer-glow-line { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 60%; height: 1px; background: linear-gradient(90deg, transparent, #8e44ad, #00d2d3, transparent); box-shadow: 0 0 15px rgba(0, 210, 211, 0.4); }
+    .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+    .footer-logo { font-size: 1.5rem; font-weight: 800; color: #fff; text-decoration: none; }
+    .footer-logo .dot { color: var(--primary); }
+    .brand-desc { font-size: 0.9rem; color: #718096; max-width: 300px; margin-top: 10px; }
+    .social-icons { display: flex; gap: 0.8rem; margin-top: 1rem; }
+    .social-link { width: 36px; height: 36px; border-radius: 8px; background: rgba(255, 255, 255, 0.03); display: flex; align-items: center; justify-content: center; color: #fff; text-decoration: none; transition: 0.3s; }
+    .social-link:hover { background: var(--primary); }
+    .footer-heading { color: #fff; font-size: 1rem; font-weight: 700; margin-bottom: 1rem; }
+    .footer-links { list-style: none; padding: 0; }
+    .footer-links li { margin-bottom: 0.6rem; }
+    .footer-links a { color: #a0aec0; text-decoration: none; transition: 0.2s; font-size: 0.9rem; }
+    .footer-links a:hover { color: var(--primary); }
+    .footer-bottom { border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 1.5rem; text-align: center; color: #718096; font-size: 0.8rem; }
+    
+    @media (max-width: 768px) {
+        .footer-grid { grid-template-columns: 1fr; text-align: center; gap: 2.5rem; }
         .footer-brand-col { align-items: center; display: flex; flex-direction: column; }
-        .brand-desc { margin-left: auto; margin-right: auto; }
-        .footer-bottom { flex-direction: column; gap: 1rem; }
-        .newsletter-form { max-width: 100%; }
+        .social-icons { justify-content: center; }
     }
     </style>
 
@@ -829,65 +717,63 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <script>
-        // Configuração padrão do Swiper
-        const swiperConfig = {
-            slidesPerView: 'auto',
-            spaceBetween: 20,
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev',
-            },
-            pagination: {
-                el: '.swiper-pagination',
-                clickable: true,
-            },
-            breakpoints: {
-                320: {
-                    slidesPerView: 2,
-                    spaceBetween: 10,
+        document.addEventListener('DOMContentLoaded', function() {
+            // Scroll Header Effect
+            const navbar = document.querySelector('.navbar');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 20) {
+                    navbar.classList.add('scrolled');
+                    navbar.classList.remove('navbar-glass');
+                } else {
+                    navbar.classList.remove('scrolled');
+                    navbar.classList.add('navbar-glass');
+                }
+            });
+
+            // Swiper Config (Mobile Optimized)
+            const swiperConfig = {
+                slidesPerView: 2, // Sempre mostra 2 cards no menor mobile
+                spaceBetween: 12, // Espaço menor no mobile
+                grabCursor: true,
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
                 },
-                768: {
-                    slidesPerView: 3,
-                    spaceBetween: 15,
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                    dynamicBullets: true,
                 },
-                1024: {
-                    slidesPerView: 4,
-                    spaceBetween: 20,
-                },
-            }
-        };
+                breakpoints: {
+                    640: { slidesPerView: 2.2, spaceBetween: 15 },
+                    768: { slidesPerView: 3, spaceBetween: 20 },
+                    1024: { slidesPerView: 4, spaceBetween: 24 },
+                    1280: { slidesPerView: 5, spaceBetween: 24 },
+                }
+            };
 
-        // Inicializar Swiper para Lançamentos de Hoje
-        const mySwiperToday = new Swiper('.mySwiperToday', swiperConfig);
+            const mySwiperToday = new Swiper('.mySwiperToday', swiperConfig);
+            const mySwiperPopular = new Swiper('.mySwiperPopular', swiperConfig);
+            const mySwiperRated = new Swiper('.mySwiperRated', swiperConfig);
+            const mySearchSwiper = new Swiper('.mySearchSwiper', swiperConfig);
 
-        // Inicializar Swiper para Animes Populares
-        const mySwiperPopular = new Swiper('.mySwiperPopular', swiperConfig);
+            // Tabs System
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    document.getElementById(tabName + '-tab').classList.add('active');
 
-        // Inicializar Swiper para Bem Avaliados
-        const mySwiperRated = new Swiper('.mySwiperRated', swiperConfig);
-
-        // Inicializar Swiper para Resultados de Busca
-        const mySearchSwiper = new Swiper('.mySearchSwiper', swiperConfig);
-
-        // Sistema de Abas
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const tabName = this.getAttribute('data-tab');
-                
-                // Remove active de todos os botões e conteúdos
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                
-                // Adiciona active ao clicado
-                this.classList.add('active');
-                document.getElementById(tabName + '-tab').classList.add('active');
-
-                // Atualizar todos os Swipers
-                setTimeout(() => {
-                    if (window.mySwiperToday) window.mySwiperToday.update();
-                    if (window.mySwiperPopular) window.mySwiperPopular.update();
-                    if (window.mySwiperRated) window.mySwiperRated.update();
-                }, 100);
+                    setTimeout(() => {
+                        if (tabName === 'today') mySwiperToday.update();
+                        if (tabName === 'popular') mySwiperPopular.update();
+                        if (tabName === 'rated') mySwiperRated.update();
+                    }, 50);
+                });
             });
         });
     </script>
