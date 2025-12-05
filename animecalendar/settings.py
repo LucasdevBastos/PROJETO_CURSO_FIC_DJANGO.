@@ -16,17 +16,29 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
 
 DEBUG = os.environ.get("DEBUG", "FALSE").upper() == "TRUE"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
+ALLOWED_HOSTS = os.environ.get(
+    "ALLOWED_HOSTS",
+    "*,.railway.app,localhost,127.0.0.1"
+).split(",")
 
-CSRF_TRUSTED_ORIGINS = [
-    origin for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if origin
-]
+# CSRF / Cookies
+_csrf_env = os.environ.get("CSRF_TRUSTED_ORIGINS", "").strip()
 
-CSRF_TRUSTED_ORIGINS = [
-    origin
-    for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
-    if origin
-]
+if _csrf_env:
+    CSRF_TRUSTED_ORIGINS = _csrf_env.split(",")
+else:
+    CSRF_TRUSTED_ORIGINS = [
+        "https://*.railway.app",
+        "http://localhost",
+        "http://127.0.0.1:8000",
+    ]
+
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = "Lax"
+
 
 # ======================
 # APPLICATIONS
@@ -40,7 +52,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # apps locais:
+    # apps locais
     "anime",
     "animecalendar",
     "calendar_app",
@@ -209,15 +221,6 @@ if not DEBUG:
             "level": "INFO",
         },
     }
-
-
-# ======================
-# CORS/CSRF (se precisar)
-# ======================
-
-# INSTALLED_APPS += ["corsheaders"]
-# MIDDLEWARE.insert(1, "corsheaders.middleware.CorsMiddleware")
-# CORS_ALLOW_ALL_ORIGINS = True
 
 
 # ======================
