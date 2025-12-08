@@ -1,0 +1,41 @@
+{% load static %}
+{# Include reutilizável para exibir avatar do usuário #}
+{# Uso: {% include "includes/avatar.html" with user=usuario avatar_class="classe-css" %} #}
+{# Ou: {% include "includes/avatar.html" with perfil=perfil avatar_class="classe-css" %} #}
+
+{% if user %}
+    {% if user.is_authenticated %}
+        {% with perfil=user.perfil %}
+            <img
+                src="{{ perfil.get_avatar_url }}"
+                alt="Avatar de {{ user.username }}"
+                class="{{ avatar_class|default:'avatar-default' }}"
+                loading="lazy"
+            >
+        {% endwith %}
+    {% else %}
+        {# Usuário não autenticado - avatar padrão #}
+        <img
+            src="{% static 'avatars/avatar_1.jpg' %}"
+            alt="Avatar padrão"
+            class="{{ avatar_class|default:'avatar-default' }}"
+            loading="lazy"
+        >
+    {% endif %}
+{% elif perfil %}
+    {# Perfil passado diretamente #}
+    <img
+        src="{{ perfil.get_avatar_url }}"
+        alt="Avatar de {{ perfil.user.username }}"
+        class="{{ avatar_class|default:'avatar-default' }}"
+        loading="lazy"
+    >
+{% else %}
+    {# Fallback final - nenhum usuário ou perfil fornecido #}
+    <img
+        src="{% static 'avatars/avatar_1.jpg' %}"
+        alt="Avatar padrão"
+        class="{{ avatar_class|default:'avatar-default' }}"
+        loading="lazy"
+    >
+{% endif %}

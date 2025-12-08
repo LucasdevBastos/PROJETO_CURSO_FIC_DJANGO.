@@ -428,13 +428,7 @@
                 {% if user.is_authenticated %}
                 <div class="dropdown">
                     <button class="user-avatar-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border: none;">
-                        {% with perfil=user.perfil %}
-                            {% if perfil.avatar %}
-                                <img src="{{ perfil.avatar.url }}" alt="{{ user.username }}" class="user-avatar-img">
-                            {% else %}
-                                <img src="https://i.pravatar.cc/150?img=11" alt="User" class="user-avatar-img">
-                            {% endif %}
-                        {% endwith %}
+                        {% include "includes/avatar.html" with user=user avatar_class="user-avatar-img" only %}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
                         <li><span class="dropdown-header text-muted">Olá, {{ user.username }}!</span></li>

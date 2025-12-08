@@ -1,0 +1,360 @@
+<!-- 
+    EXEMPLOS DE USO DO SISTEMA DE AVATARES
+    Este arquivo contém exemplos de como usar o sistema de avatares nos templates
+-->
+
+<!-- ============================================================ -->
+<!-- EXEMPLO 1: Exibir avatar em qualquer lugar -->
+<!-- ============================================================ -->
+
+<!-- Versão simples -->
+<img src="{{ user.perfil.get_avatar_url }}" alt="Avatar de {{ user.username }}" class="avatar">
+
+<!-- Versão com fallback -->
+<img src="{{ user.perfil.get_avatar_url|default:'/static/avatars/avatar_1.jpg' }}" 
+     alt="Avatar" 
+     class="avatar">
+
+<!-- Versão com verificação de perfil -->
+{% if user.perfil %}
+    <img src="{{ user.perfil.get_avatar_url }}" 
+         alt="Avatar de {{ user.username }}" 
+         class="rounded-circle avatar"
+         width="50" height="50">
+{% else %}
+    <img src="/static/avatars/avatar_1.jpg" 
+         alt="Avatar padrão" 
+         class="rounded-circle avatar"
+         width="50" height="50">
+{% endif %}
+
+
+<!-- ============================================================ -->
+<!-- EXEMPLO 2: Navbar com avatar do usuário logado -->
+<!-- ============================================================ -->
+
+<nav class="navbar">
+    <div class="navbar-user">
+        {% if user.is_authenticated %}
+            <a href="{% url 'perfil:ver' user.username %}">
+                <img src="{{ user.perfil.get_avatar_url }}" 
+                     alt="{{ user.username }}" 
+                     class="navbar-avatar rounded-circle"
+                     width="40" height="40">
+                <span>{{ user.username }}</span>
+            </a>
+        {% else %}
+            <a href="{% url 'users:login' %}">Login</a>
+        {% endif %}
+    </div>
+</nav>
+
+
+<!-- ============================================================ -->
+<!-- EXEMPLO 3: Perfil do usuário com banner VIP -->
+<!-- ============================================================ -->
+
+<div class="profile-page">
+    <!-- Banner (apenas VIP) -->
+    {% if perfil.get_banner_url %}
+        <div class="profile-banner" style="background-image: url('{{ perfil.get_banner_url }}');">
+            <div class="banner-overlay">
+                <h1>{{ usuario.username }}</h1>
+                <span class="vip-badge">🌟 VIP</span>
+            </div>
+        </div>
+    {% else %}
+        <div class="profile-banner-default">
+            <h1>{{ usuario.username }}</h1>
+        </div>
+    {% endif %}
+    
+    <!-- Avatar grande -->
+    <div class="profile-avatar-container">
+        <img src="{{ perfil.get_avatar_url }}" 
+             alt="Avatar de {{ usuario.username }}"
+             class="profile-avatar-large rounded-circle"
+             width="150" height="150">
+        {% if perfil.is_vip %}
+            <span class="vip-indicator" title="Usuário VIP">💎</span>
+        {% endif %}
+    </div>
+    
+    <!-- Resto do perfil -->
+    <div class="profile-info">
+        <h2>{{ usuario.username }}</h2>
+        {% if perfil.bio %}
+            <p class="bio">{{ perfil.bio }}</p>
+        {% endif %}
+    </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- EXEMPLO 4: Lista de comentários com avatares -->
+<!-- ============================================================ -->
+
+<div class="comentarios-list">
+    {% for comentario in comentarios %}
+        <div class="comentario-card">
+            <div class="comentario-header">
+                <img src="{{ comentario.usuario.perfil.get_avatar_url }}" 
+                     alt="{{ comentario.usuario.username }}"
+                     class="comentario-avatar rounded-circle"
+                     width="40" height="40">
+                <div class="comentario-meta">
+                    <a href="{% url 'perfil:ver' comentario.usuario.username %}">
+                        {{ comentario.usuario.username }}
+                        {% if comentario.usuario.perfil.is_vip %}
+                            <span class="vip-badge-small">VIP</span>
+                        {% endif %}
+                    </a>
+                    <small>{{ comentario.criado_em|timesince }} atrás</small>
+                </div>
+            </div>
+            <div class="comentario-body">
+                {{ comentario.texto }}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+
+<!-- ============================================================ -->
+<!-- EXEMPLO 5: Formulário de edição de perfil -->
+<!-- ============================================================ -->
+
+<div class="editar-perfil-page">
+    <h1>Editar Perfil</h1>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Seção: Avatar Padrão (todos os usuários) -->
+        <div class="form-section">
+            <h3>Avatar Padrão</h3>
+            <p class="text-muted">Escolha um dos avatares disponíveis:</p>
+            
+            <div class="avatar-choices-grid">
+                {% for choice in avatar_choices %}
+                    <label class="avatar-choice-item">
+                        <input type="radio" 
+                               name="avatar_choice" 
+                               value="{{ choice.0 }}"
+                               {% if perfil.avatar_choice == choice.0 %}checked{% endif %}
+                               required>
+                        <img src="/static/avatars/{{ choice.0 }}" 
+                             alt="{{ choice.1 }}"
+                             class="avatar-preview rounded-circle"
+                             width="80" height="80">
+                        <span class="avatar-label">{{ choice.1 }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Seção: Biografia (todos os usuários) -->
+        <div class="form-section">
+            <h3>Biografia</h3>
+            {{ form.bio.errors }}
+            {{ form.bio }}
+            <small class="form-text text-muted">{{ form.bio.help_text }}</small>
+        </div>
+        
+        <!-- Seção: Recursos VIP (apenas para VIP) -->
+        {% if is_vip %}
+            <div class="form-section vip-section">
+                <h3>🌟 Recursos VIP</h3>
+                
+                <!-- Avatar Personalizado -->
+                <div class="form-group">
+                    <label for="{{ form.custom_avatar.id_for_label }}">
+                        {{ form.custom_avatar.label }}
+                    </label>
+                    {{ form.custom_avatar.errors }}
+                    {{ form.custom_avatar }}
+                    <small class="form-text text-muted">{{ form.custom_avatar.help_text }}</small>
+                    
+                    <!-- Preview do avatar personalizado -->
+                    {% if perfil.custom_avatar %}
+                        <div class="mt-2">
+                            <p>Preview:</p>
+                            <img src="{{ perfil.custom_avatar }}" 
+                                 alt="Preview"
+                                 class="rounded-circle"
+                                 width="100" height="100">
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Banner Personalizado -->
+                <div class="form-group">
+                    <label for="{{ form.custom_banner.id_for_label }}">
+                        {{ form.custom_banner.label }}
+                    </label>
+                    {{ form.custom_banner.errors }}
+                    {{ form.custom_banner }}
+                    <small class="form-text text-muted">{{ form.custom_banner.help_text }}</small>
+                    
+                    <!-- Preview do banner -->
+                    {% if perfil.custom_banner %}
+                        <div class="mt-2">
+                            <p>Preview:</p>
+                            <div class="banner-preview" 
+                                 style="background-image: url('{{ perfil.custom_banner }}'); height: 100px; background-size: cover;">
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <!-- Mensagem para não-VIP -->
+            <div class="info-box">
+                <div class="info-icon">💎</div>
+                <div class="info-content">
+                    <h4>Recursos Premium</h4>
+                    <p>Você pode escolher um dos avatares padrão acima.</p>
+                    <p>Para usar avatar ou banner personalizado, é necessário ser <strong>VIP</strong>.</p>
+                    <a href="#" class="btn btn-primary btn-sm">Tornar-se VIP</a>
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Botões de ação -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                💾 Salvar Alterações
+            </button>
+            <a href="{% url 'perfil:ver' user.username %}" class="btn btn-secondary">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- CSS de exemplo para o formulário de avatares -->
+<style>
+.avatar-choices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.avatar-choice-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.avatar-choice-item:hover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.avatar-choice-item input[type="radio"] {
+    margin-bottom: 10px;
+}
+
+.avatar-choice-item input[type="radio"]:checked + .avatar-preview {
+    border: 3px solid #007bff;
+}
+
+.avatar-preview {
+    border: 2px solid #ddd;
+    transition: border 0.3s ease;
+}
+
+.avatar-label {
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #666;
+}
+
+.vip-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 25px;
+    border-radius: 10px;
+    color: white;
+}
+
+.vip-section h3 {
+    color: white;
+    margin-bottom: 20px;
+}
+
+.vip-section .form-control {
+    background-color: rgba(255,255,255,0.9);
+}
+
+.info-box {
+    background-color: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 25px;
+    display: flex;
+    gap: 20px;
+    align-items: start;
+}
+
+.info-icon {
+    font-size: 48px;
+}
+
+.info-content h4 {
+    margin-top: 0;
+    color: #333;
+}
+
+.vip-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.vip-badge-small {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: bold;
+    margin-left: 5px;
+}
+</style>
+
+
+<!-- ============================================================ -->
+<!-- EXEMPLO 6: Card de usuário (para listas) -->
+<!-- ============================================================ -->
+
+<div class="user-card">
+    <a href="{% url 'perfil:ver' usuario.username %}" class="user-card-link">
+        <img src="{{ usuario.perfil.get_avatar_url }}" 
+             alt="{{ usuario.username }}"
+             class="user-card-avatar rounded-circle"
+             width="60" height="60">
+        <div class="user-card-info">
+            <h4>
+                {{ usuario.username }}
+                {% if usuario.perfil.is_vip %}
+                    <span class="vip-badge-small">💎</span>
+                {% endif %}
+            </h4>
+            {% if usuario.perfil.bio %}
+                <p class="user-card-bio">{{ usuario.perfil.bio|truncatewords:10 }}</p>
+            {% endif %}
+        </div>
+    </a>
+</div>

@@ -29,6 +29,10 @@
     rel="stylesheet"
   >
 
+  <!-- CSS de Avatares -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
   <style>
     :root {
       --primary: #a855f7;        /* Roxo vibrante */
@@ -225,20 +229,8 @@
           <!-- Menu dropdown do usuário -->
           <div class="dropdown">
             <button class="btn btn-link btn-sm text-light dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" style="text-decoration: none; padding: 0.25rem 0.5rem;">
-              {% with perfil=user.perfil %}
-                {% if perfil.avatar %}
-                  <img 
-                    src="{{ perfil.avatar.url }}" 
-                    alt="{{ user.username }}"
-                    class="rounded-circle"
-                    style="width: 36px; height: 36px; object-fit: cover; border: 2px solid var(--primary);"
-                    title="{{ user.username }}"
-                  >
-                {% else %}
-                  <i class="bi bi-person-circle" style="font-size: 1.3rem;"></i>
-                {% endif %}
-                <span class="d-none d-md-inline small">{{ user.username }}</span>
-              {% endwith %}
+              {% include "includes/avatar.html" with user=user avatar_class="navbar-avatar" only %}
+              <span class="d-none d-md-inline small">{{ user.username }}</span>
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
               <li>

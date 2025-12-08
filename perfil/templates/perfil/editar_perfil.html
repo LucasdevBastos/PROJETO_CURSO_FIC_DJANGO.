@@ -41,40 +41,98 @@
                 <form method="POST" enctype="multipart/form-data" novalidate>
                     {% csrf_token %}
 
-                    <!-- SEÇÃO: AVATAR -->
-                    <div class="avatar-upload-section">
-                        <div class="current-avatar-wrapper">
-                            {% if perfil.avatar %}
-                                <img src="{{ perfil.avatar.url }}" alt="Avatar" class="avatar-preview" id="avatarPreview">
-                            {% else %}
-                                <div class="avatar-placeholder" id="avatarPlaceholder">
-                                    {{ user.username|first|upper }}
-                                </div>
-                            {% endif %}
-                            <div class="avatar-glow"></div>
-                            
-                            <!-- Ícone de câmera sobreposto -->
-                            <label for="{{ form.avatar.id_for_label }}" class="avatar-edit-overlay">
-                                <i class="bi bi-camera-fill"></i>
-                            </label>
-                        </div>
-
-                        <div class="upload-controls">
-                            <label class="form-label-neon">Imagem de Perfil</label>
-                            <div class="custom-file-input">
-                                {{ form.avatar }}
-                            </div>
-                            <small class="text-hint">Recomendado: 500x500px (JPG, PNG)</small>
-                            {% if form.avatar.errors %}
-                                <div class="error-msg">
-                                    {{ form.avatar.errors }}
-                                </div>
-                            {% endif %}
+                    <!-- SEÇÃO: ESCOLHA DE AVATAR PADRÃO -->
+                    <div class="avatar-choice-section">
+                        <label class="form-label-neon">
+                            <i class="bi bi-collection"></i> Escolha seu Avatar Padrão
+                        </label>
+                        <p class="text-hint">Selecione um dos avatares disponíveis:</p>
+                        
+                        <div class="avatar-grid">
+                            {% for value, label in avatar_choices %}
+                                <label class="avatar-option">
+                                    <input
+                                        type="radio"
+                                        name="avatar_choice"
+                                        value="{{ value }}"
+                                        {% if perfil.avatar_choice == value %}checked{% endif %}
+                                        required
+                                    >
+                                    <img src="{% static 'avatars/' %}{{ value }}" alt="{{ label }}" class="avatar-img">
+                                    <span class="avatar-label">{{ label }}</span>
+                                    <div class="avatar-check">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                    </div>
+                                </label>
+                            {% endfor %}
                         </div>
                     </div>
 
                     <!-- DIVISOR -->
                     <div class="neon-divider-horizontal"></div>
+
+                    <!-- SEÇÃO: CAMPOS VIP (se aplicável) -->
+                    {% if is_vip %}
+                        <div class="vip-section">
+                            <div class="vip-header">
+                                <h3>
+                                    <i class="bi bi-star-fill"></i>
+                                    Recursos VIP
+                                </h3>
+                                <span class="vip-badge">💎 VIP</span>
+                            </div>
+                            <p class="text-hint">Como usuário VIP, você pode usar avatar e banner personalizados!</p>
+                            
+                            <!-- Avatar Personalizado -->
+                            <div class="form-group-neon">
+                                <label for="{{ form.custom_avatar.id_for_label }}" class="form-label-neon">
+                                    <i class="bi bi-image"></i> Avatar Personalizado (URL)
+                                </label>
+                                <div class="input-wrapper">
+                                    {{ form.custom_avatar }}
+                                </div>
+                                <small class="text-hint">Deixe em branco para usar o avatar padrão selecionado acima.</small>
+                                {% if form.custom_avatar.errors %}
+                                    <div class="error-msg">{{ form.custom_avatar.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Banner Personalizado -->
+                            <div class="form-group-neon">
+                                <label for="{{ form.custom_banner.id_for_label }}" class="form-label-neon">
+                                    <i class="bi bi-card-image"></i> Banner Personalizado (URL)
+                                </label>
+                                <div class="input-wrapper">
+                                    {{ form.custom_banner }}
+                                </div>
+                                <small class="text-hint">Banner exibido no topo do seu perfil.</small>
+                                {% if form.custom_banner.errors %}
+                                    <div class="error-msg">{{ form.custom_banner.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- DIVISOR -->
+                        <div class="neon-divider-horizontal"></div>
+                    {% else %}
+                        <!-- Mensagem para não-VIP -->
+                        <div class="non-vip-info">
+                            <div class="info-icon">💎</div>
+                            <div class="info-content">
+                                <h4>Quer mais personalização?</h4>
+                                <p>Você pode escolher qualquer um dos avatares padrão acima.</p>
+                                <p><strong>Recursos VIP incluem:</strong></p>
+                                <ul>
+                                    <li>Avatar personalizado (sua própria URL)</li>
+                                    <li>Banner personalizado no perfil</li>
+                                    <li>Badge especial VIP</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- DIVISOR -->
+                        <div class="neon-divider-horizontal"></div>
+                    {% endif %}
 
                     <!-- SEÇÃO: BIO -->
                     <div class="form-group-neon">
@@ -189,6 +247,205 @@
     align-items: center;
     gap: 2.5rem;
     margin-bottom: 2rem;
+}
+
+/* --- ESCOLHA DE AVATAR PADRÃO (GRID VISUAL) --- */
+.avatar-choice-section {
+    margin-bottom: 2rem;
+}
+
+.avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.avatar-option {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 2px solid var(--border-glass);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.avatar-option:hover {
+    border-color: var(--cyan-lumi);
+    background: rgba(0, 210, 211, 0.05);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 210, 211, 0.2);
+}
+
+.avatar-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.avatar-option .avatar-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--border-glass);
+    transition: all 0.3s ease;
+    margin-bottom: 0.5rem;
+}
+
+.avatar-option .avatar-label {
+    font-size: 0.85rem;
+    color: var(--text-sec);
+    font-weight: 500;
+    text-align: center;
+}
+
+.avatar-option .avatar-check {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: var(--cyan-lumi);
+    font-size: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Estado checked */
+.avatar-option input[type="radio"]:checked ~ .avatar-img {
+    border-color: var(--cyan-lumi);
+    box-shadow: 0 0 20px rgba(0, 210, 211, 0.5);
+}
+
+.avatar-option input[type="radio"]:checked ~ .avatar-check {
+    opacity: 1;
+}
+
+.avatar-option input[type="radio"]:checked + .avatar-img + .avatar-label + .avatar-check,
+.avatar-option:has(input[type="radio"]:checked) .avatar-check {
+    opacity: 1;
+}
+
+.avatar-option:has(input[type="radio"]:checked) {
+    border-color: var(--cyan-lumi);
+    background: rgba(0, 210, 211, 0.1);
+    box-shadow: 0 0 30px rgba(0, 210, 211, 0.3);
+}
+
+.avatar-option:has(input[type="radio"]:checked) .avatar-img {
+    border-color: var(--cyan-lumi);
+    box-shadow: 0 0 20px rgba(0, 210, 211, 0.5);
+}
+
+/* --- SEÇÃO VIP --- */
+.vip-section {
+    background: linear-gradient(135deg, rgba(142, 68, 173, 0.1), rgba(123, 31, 162, 0.1));
+    border: 1px solid rgba(142, 68, 173, 0.3);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.vip-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.vip-header h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.vip-header h3 i {
+    color: #ffd700;
+}
+
+.vip-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.vip-section .input-wrapper input[type="text"] {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-glass);
+    border-radius: 12px;
+    color: var(--text-main);
+    padding: 0.9rem;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    transition: 0.3s;
+    outline: none;
+}
+
+.vip-section .input-wrapper input[type="text"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(142, 68, 173, 0.3);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+/* --- INFO PARA NÃO-VIP --- */
+.non-vip-info {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(41, 128, 185, 0.1));
+    border: 1px solid rgba(52, 152, 219, 0.3);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.info-icon {
+    font-size: 3rem;
+    line-height: 1;
+}
+
+.info-content h4 {
+    margin-top: 0;
+    color: var(--text-main);
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.info-content p {
+    color: var(--text-sec);
+    margin-bottom: 0.5rem;
+}
+
+.info-content ul {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 0.5rem;
+}
+
+.info-content li {
+    color: var(--text-sec);
+    padding: 0.3rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.info-content li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--cyan-lumi);
+    font-weight: bold;
 }
 
 .current-avatar-wrapper {
@@ -396,38 +653,36 @@
 @media (max-width: 768px) {
     .glass-form-card { padding: 1.5rem; }
     .avatar-upload-section { flex-direction: column; text-align: center; gap: 1.5rem; }
+    .avatar-grid { 
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 0.8rem;
+    }
+    .avatar-option {
+        padding: 0.8rem;
+    }
+    .avatar-option .avatar-img {
+        width: 60px;
+        height: 60px;
+    }
+    .avatar-option .avatar-label {
+        font-size: 0.75rem;
+    }
+    .non-vip-info {
+        flex-direction: column;
+        text-align: center;
+    }
+    .info-icon {
+        font-size: 2.5rem;
+    }
     .form-actions { flex-direction: column-reverse; }
     .btn-neon, .btn-glass { width: 100%; justify-content: center; }
 }
+
+@media (max-width: 480px) {
+    .avatar-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
 </style>
 
-<!-- Script Opcional para Preview de Imagem (JS simples inline) -->
-<script>
-    const avatarInput = document.querySelector('input[type="file"]');
-    const avatarPreview = document.getElementById('avatarPreview');
-    const avatarPlaceholder = document.getElementById('avatarPlaceholder');
-
-    if (avatarInput) {
-        avatarInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    if (avatarPreview) {
-                        avatarPreview.src = e.target.result;
-                    } else if (avatarPlaceholder) {
-                        // Se não tinha imagem antes, cria uma tag img
-                        const newImg = document.createElement('img');
-                        newImg.src = e.target.result;
-                        newImg.alt = "Avatar Preview";
-                        newImg.className = "avatar-preview";
-                        newImg.id = "avatarPreview";
-                        avatarPlaceholder.parentNode.replaceChild(newImg, avatarPlaceholder);
-                    }
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-</script>
 {% endblock %}

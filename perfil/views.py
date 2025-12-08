@@ -47,7 +47,13 @@ def perfil_usuario(request, username):
 
 @login_required
 def editar_perfil(request):
-    """Editar perfil do usuário logado"""
+    """
+    Editar perfil do usuário logado
+    
+    Regras:
+    - Todos podem editar avatar_choice (avatares padrão) e bio
+    - Apenas VIP pode editar custom_avatar e custom_banner
+    """
     # Garantir que o perfil existe
     perfil, created = Perfil.objects.get_or_create(user=request.user)
     
@@ -55,8 +61,23 @@ def editar_perfil(request):
         form = PerfilForm(request.POST, request.FILES, instance=perfil)
         
         if form.is_valid():
-            form.save()
-            messages.success(request, "Perfil atualizado com sucesso!")
+            # Salvar o formulário
+            perfil_atualizado = form.save(commit=False)
+            
+            # Garantir que não-VIP não possam ter campos personalizados
+            # (redundância de segurança, já está no model.save() e form.clean())
+            if not perfil_atualizado.is_vip:
+                perfil_atualizado.custom_avatar = None
+                perfil_atualizado.custom_banner = None
+            
+            perfil_atualizado.save()
+            
+            # Mensagem baseada em status VIP
+            if perfil.is_vip:
+                messages.success(request, "Perfil VIP atualizado com sucesso!")
+            else:
+                messages.success(request, "Perfil atualizado com sucesso!")
+            
             return redirect('perfil:ver', username=request.user.username)
         else:
             for field, errors in form.errors.items():
@@ -68,6 +89,8 @@ def editar_perfil(request):
     context = {
         'form': form,
         'perfil': perfil,
+        'is_vip': perfil.is_vip,  # Para uso no template
+        'avatar_choices': Perfil.AVATAR_CHOICES,  # Para preview dos avatares
     }
     
     return render(request, 'perfil/editar_perfil.html', context)

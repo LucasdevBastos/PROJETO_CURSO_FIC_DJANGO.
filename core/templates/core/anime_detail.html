@@ -233,9 +233,7 @@
                                 <div class="comment-item" data-comment-id="{{ comentario.id }}">
                                     <div class="comment-item-header">
                                         <div class="user-profile">
-                                            <div class="user-avatar" title="{{ comentario.user.username }}">
-                                                {{ comentario.user.username|make_list|first|upper }}
-                                            </div>
+                                            {% include "includes/avatar.html" with user=comentario.user avatar_class="user-avatar" only %}
                                             <div class="user-details">
                                                 <a href="{% url 'perfil:ver' comentario.user.username %}" class="user-name">
                                                     {{ comentario.user.get_full_name|default:comentario.user.username }}
