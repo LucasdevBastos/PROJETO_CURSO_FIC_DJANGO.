@@ -98,212 +98,389 @@
                 <p>Já tem conta? <a href="{% url 'users:login' %}" class="register-link">Faça login</a></p>
             </div>
         </div>
+
+        <!-- Card Decorativo (informações laterais) -->
+        <div class="promo-card">
+            <i class="bi bi-stars promo-icon"></i>
+            <h3>Descubra novos animes</h3>
+            <p>Explore um vasto catálogo e mantenha-se atualizado com os lançamentos da temporada.</p>
+            
+            <div class="promo-features">
+                <div class="promo-item">
+                    <i class="bi bi-calendar-check"></i>
+                    <span>Calendário</span>
+                </div>
+                <div class="promo-item">
+                    <i class="bi bi-people"></i>
+                    <span>Comunidade</span>
+                </div>
+                <div class="promo-item">
+                    <i class="bi bi-trophy"></i>
+                    <span>Rankings</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
     </div>
 </div>
 
 <style>
-/* --- ANILUMI AUTH SYSTEM --- */
-:root {
-    --bg-body: #090b10;
-    --accent: #8e44ad;       
-    --accent-glow: rgba(142, 68, 173, 0.5);
-    --cyan-lumi: #00d2d3;
-    --text-main: #ffffff;
-    --text-sec: #a0aec0;
-    --border-glass: rgba(255, 255, 255, 0.08);
-    --input-bg: rgba(0, 0, 0, 0.3);
-}
+    .auth-wrapper {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        overflow: hidden;
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a0d2e 50%, #0a0a0a 100%);
+    }
 
-/* Wrapper Imersivo */
-.auth-wrapper {
-    background: url('https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=1920&auto=format&fit=crop') no-repeat center center;
-    background-size: cover;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    font-family: 'Inter', sans-serif;
-    color: var(--text-main);
-    overflow: hidden;
-}
+    .auth-glow {
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: pulse 4s ease-in-out infinite;
+    }
 
-/* Overlay Escuro com leve tom roxo */
-.auth-wrapper::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(5, 5, 5, 0.9), rgba(15, 10, 20, 0.85));
-    z-index: 1;
-}
+    @keyframes pulse {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+        50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.7; }
+    }
 
-/* Glow de fundo animado */
-.auth-glow {
-    position: absolute;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(142, 68, 173, 0.15), transparent 70%);
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1;
-    pointer-events: none;
-}
+    .register-container {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        max-width: 480px;
+        width: 100%;
+    }
 
-.register-container {
-    position: relative; z-index: 2;
-    width: 100%; padding: 20px;
-    display: flex; justify-content: center;
-}
+    @media (min-width: 992px) {
+        .register-container {
+            grid-template-columns: 480px 320px;
+            max-width: 840px;
+        }
+    }
 
-/* CARD GLASSMORPHISM */
-.register-glass-card {
-    background: rgba(23, 23, 23, 0.75);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--border-glass);
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 24px;
-    padding: 3rem 2.5rem;
-    width: 100%; max-width: 450px;
-    box-shadow: 0 40px 80px -12px rgba(0, 0, 0, 0.8);
-    animation: fadeInUp 0.6s ease-out forwards;
-}
+    .register-glass-card {
+        background: rgba(15, 15, 35, 0.8);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 3rem 2.5rem;
+        border: 1px solid rgba(168, 85, 247, 0.2);
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
 
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
 
-/* HEADER */
-.auth-header { text-align: center; margin-bottom: 2.5rem; }
+    .brand-logo {
+        display: inline-block;
+        font-size: 1.8rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #a855f7, #ec4899);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-decoration: none;
+        margin-bottom: 1rem;
+        letter-spacing: -0.02em;
+    }
 
-.brand-logo {
-    font-size: 1.5rem; font-weight: 800; color: white; text-decoration: none;
-    display: block; margin-bottom: 1.5rem; letter-spacing: -0.5px;
-}
-.brand-logo .dot { color: var(--cyan-lumi); }
+    .brand-logo .dot {
+        color: #ec4899;
+        -webkit-text-fill-color: #ec4899;
+    }
 
-.welcome-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
-.welcome-sub { color: var(--text-sec); font-size: 0.95rem; }
+    .welcome-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 1rem 0 0.5rem;
+    }
 
-/* SOCIAL BUTTONS */
-.social-login-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+    .welcome-sub {
+        color: #9ca3af;
+        font-size: 0.95rem;
+    }
 
-.social-btn {
-    display: flex; align-items: center; justify-content: center; gap: 0.8rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border-glass);
-    color: white; padding: 0.8rem; border-radius: 12px;
-    text-decoration: none; font-size: 0.9rem; font-weight: 500;
-    transition: 0.3s;
-}
-.social-btn:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
-.social-btn i { font-size: 1.1rem; }
-.social-btn.discord:hover { color: #5865F2; border-color: rgba(88, 101, 242, 0.3); }
-.social-btn.google:hover { color: #DB4437; border-color: rgba(219, 68, 55, 0.3); }
+    .social-login-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
 
-/* DIVIDER */
-.divider-neon {
-    display: flex; align-items: center; text-align: center;
-    color: var(--text-sec); margin: 2rem 0; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;
-}
-.divider-neon::before, .divider-neon::after {
-    content: ''; flex: 1; border-bottom: 1px solid var(--border-glass);
-}
-.divider-neon span { padding: 0 15px; opacity: 0.6; }
+    .social-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.03);
+        color: #e5e7eb;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
 
-/* FORMULÁRIO */
-.input-group-neon { margin-bottom: 1.5rem; }
+    .social-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(168, 85, 247, 0.5);
+        transform: translateY(-2px);
+    }
 
-.input-group-neon label {
-    display: block; color: var(--text-sec); font-size: 0.85rem; font-weight: 600;
-    margin-bottom: 0.6rem;
-}
+    .social-btn.google:hover {
+        border-color: #ea4335;
+    }
 
-.input-wrapper { position: relative; }
+    .social-btn.discord:hover {
+        border-color: #5865f2;
+    }
 
-.input-icon {
-    position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
-    color: var(--text-sec); font-size: 1.1rem; transition: 0.3s;
-}
+    .divider-neon {
+        position: relative;
+        text-align: center;
+        margin: 2rem 0 1.5rem;
+        color: #6b7280;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+    }
 
-/* Estilização dos Inputs do Django */
-.auth-form input[type="text"],
-.auth-form input[type="password"] {
-    width: 100%;
-    background: var(--input-bg);
-    border: 1px solid var(--border-glass);
-    color: white;
-    padding: 1rem 1rem 1rem 3rem; /* Espaço para ícone */
-    border-radius: 12px;
-    font-size: 1rem;
-    font-family: 'Inter', sans-serif;
-    transition: 0.3s;
-    outline: none;
-}
+    .divider-neon::before,
+    .divider-neon::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        width: calc(50% - 90px);
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.3));
+    }
 
-.auth-form input:focus {
-    border-color: var(--accent);
-    background: rgba(0, 0, 0, 0.5);
-    box-shadow: 0 0 0 4px rgba(142, 68, 173, 0.15);
-}
+    .divider-neon::before {
+        left: 0;
+    }
 
-.auth-form input:focus ~ .input-icon, 
-.input-wrapper:focus-within .input-icon {
-    color: var(--accent);
-}
+    .divider-neon::after {
+        right: 0;
+        background: linear-gradient(90deg, rgba(168, 85, 247, 0.3), transparent);
+    }
 
-/* BOTÃO PRINCIPAL */
-.btn-register-neon {
-    width: 100%;
-    background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
-    border: none; color: white;
-    padding: 1rem; border-radius: 12px;
-    font-size: 1rem; font-weight: 700;
-    cursor: pointer; margin-top: 1rem;
-    transition: 0.3s;
-    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-}
+    .glass-alert {
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
 
-.btn-register-neon:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);
-}
+    .glass-alert i {
+        font-size: 1.25rem;
+        color: #f87171;
+    }
 
-/* ALERTS */
-.glass-alert {
-    background: rgba(231, 76, 60, 0.1);
-    border: 1px solid rgba(231, 76, 60, 0.3);
-    border-left: 4px solid #e74c3c;
-    color: #ffadad;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    display: flex; align-items: flex-start; gap: 1rem;
-    font-size: 0.9rem;
-}
-.glass-alert i { font-size: 1.2rem; }
+    .glass-alert strong {
+        display: block;
+        color: #fca5a5;
+        margin-bottom: 0.25rem;
+    }
 
-.error-text {
-    display: block; color: #ffadad; font-size: 0.8rem; margin-top: 0.5rem;
-}
+    .glass-alert .small {
+        color: #d1d5db;
+        font-size: 0.875rem;
+    }
 
-/* FOOTER */
-.auth-footer {
-    text-align: center; margin-top: 2rem; padding-top: 1.5rem;
-    border-top: 1px solid var(--border-glass);
-    color: var(--text-sec); font-size: 0.9rem;
-}
+    .auth-form {
+        margin-top: 1.5rem;
+    }
 
-.register-link {
-    color: var(--cyan-lumi); text-decoration: none; font-weight: 700;
-    margin-left: 0.3rem; transition: 0.3s;
-}
-.register-link:hover { text-decoration: underline; text-shadow: 0 0 10px rgba(0, 210, 211, 0.4); }
+    .input-group-neon {
+        margin-bottom: 1.5rem;
+    }
 
-/* Responsividade */
-@media (max-width: 480px) {
-    .register-glass-card { padding: 2rem 1.5rem; }
-    .auth-header h1 { font-size: 1.5rem; }
-    .social-login-grid { grid-template-columns: 1fr; }
-}
+    .input-group-neon label {
+        display: block;
+        color: #d1d5db;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+        font-size: 1.1rem;
+        pointer-events: none;
+    }
+
+    .input-wrapper input {
+        width: 100%;
+        padding: 0.875rem 1rem 0.875rem 2.75rem;
+        border-radius: 12px;
+        border: 1px solid rgba(168, 85, 247, 0.2);
+        background: rgba(15, 15, 35, 0.6);
+        color: #fff;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .input-wrapper input:focus {
+        outline: none;
+        border-color: #a855f7;
+        box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+        background: rgba(15, 15, 35, 0.8);
+    }
+
+    .error-text {
+        display: block;
+        color: #f87171;
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+    }
+
+    .btn-register-neon {
+        width: 100%;
+        padding: 1rem;
+        border-radius: 12px;
+        border: none;
+        background: linear-gradient(135deg, #a855f7, #ec4899);
+        color: #fff;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 20px rgba(168, 85, 247, 0.3);
+    }
+
+    .btn-register-neon:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 30px rgba(168, 85, 247, 0.5);
+    }
+
+    .btn-register-neon:active {
+        transform: translateY(0);
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        color: #9ca3af;
+        font-size: 0.9rem;
+    }
+
+    .register-link {
+        color: #a855f7;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s;
+    }
+
+    .register-link:hover {
+        color: #ec4899;
+    }
+
+    /* Card Promocional Lateral */
+    .promo-card {
+        display: none;
+        background: rgba(168, 85, 247, 0.05);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 2.5rem;
+        border: 1px solid rgba(168, 85, 247, 0.2);
+        text-align: center;
+    }
+
+    @media (min-width: 992px) {
+        .promo-card {
+            display: block;
+        }
+    }
+
+    .promo-icon {
+        font-size: 3rem;
+        color: #a855f7;
+        margin-bottom: 1rem;
+    }
+
+    .promo-card h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 1rem;
+    }
+
+    .promo-card p {
+        color: #9ca3af;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .promo-features {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .promo-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        color: #d1d5db;
+    }
+
+    .promo-item i {
+        color: #a855f7;
+        font-size: 1.25rem;
+    }
+
+    /* Responsivo */
+    @media (max-width: 480px) {
+        .register-glass-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .welcome-title {
+            font-size: 1.5rem;
+        }
+
+        .social-login-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 {% endblock %}

@@ -199,12 +199,20 @@
           </a>
         </li>
 
+        {% if user.is_authenticated %}
         <li class="nav-item">
           <a class="nav-link {% if request.resolver_match.app_name == 'calendar_app' %}active{% endif %}"
              href="{% url 'calendar_app:month_current' %}">
             Temporada
           </a>
         </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'users:login' %}?next={% url 'calendar_app:month_current' %}">
+            Temporada
+          </a>
+        </li>
+        {% endif %}
 
         <li class="nav-item">
           <a class="nav-link {% if request.resolver_match.app_name == 'anime' %}active{% endif %}"
@@ -213,13 +221,6 @@
           </a>
         </li>
 
-        {% if not user.is_authenticated %}
-        <li class="nav-item">
-          <a class="nav-link" href="#">
-            News
-          </a>
-        </li>
-        {% endif %}
 
       </ul>
 
@@ -304,7 +305,11 @@
                 <ul class="footer-links">
                     <li><a href="{% url 'landing' %}">Início</a></li>
                     <li><a href="{% url 'anime:anime_list' %}">Catálogo Completo</a></li>
+                    {% if user.is_authenticated %}
                     <li><a href="{% url 'calendar_app:month_current' %}">Calendário da Temporada</a></li>
+                    {% else %}
+                    <li><a href="{% url 'users:login' %}?next={% url 'calendar_app:month_current' %}">Calendário da Temporada</a></li>
+                    {% endif %}
                     <li><a href="#">Em Alta</a></li>
                 </ul>
             </div>

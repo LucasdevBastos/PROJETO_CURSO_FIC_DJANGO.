@@ -244,7 +244,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # AUTH SETTINGS
 # ======================
 
-LOGIN_URL = "/accounts/login/"
+LOGIN_URL = "/conta/login/"  # Redireciona para o login customizado
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
