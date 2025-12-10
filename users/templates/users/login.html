@@ -1,0 +1,528 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Login - AniLumi{% endblock %}
+
+{% block content %}
+<!-- Fontes e Ícones -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="auth-wrapper">
+    <!-- Glow de fundo decorativo -->
+    <div class="auth-glow"></div>
+
+    <div class="register-container">
+        <div class="register-glass-card">
+            
+            <!-- Cabeçalho -->
+            <div class="auth-header">
+                <a href="{% url 'landing' %}" class="brand-logo">Anilumi<span class="dot">.</span></a>
+                <h1 class="welcome-title">Bem-vindo de volta</h1>
+                <p class="welcome-sub">Entre para continuar sua jornada.</p>
+            </div>
+
+            <!-- Botões Sociais -->
+            <div class="social-login-grid">
+                <a href="#" class="social-btn google">
+                    <i class="fab fa-google"></i> Google
+                </a>
+                <a href="#" class="social-btn discord">
+                    <i class="fab fa-discord"></i> Discord
+                </a>
+            </div>
+
+            <div class="divider-neon">
+                <span>OU ENTRE COM E-MAIL</span>
+            </div>
+
+            <!-- Mensagem de Erro (Estilizada) -->
+            {% if form.non_field_errors %}
+                <div class="glass-alert error">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>
+                        <strong>Erro no Login</strong><br>
+                        <span class="small">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </span>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if form.errors %}
+                <div class="glass-alert error">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>
+                        <strong>Credenciais inválidas</strong><br>
+                        <span class="small">Por favor, verifique seu usuário e senha.</span>
+                    </div>
+                </div>
+            {% endif %}
+
+            <form method="POST" novalidate class="auth-form">
+                {% csrf_token %}
+                
+                {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                {% endif %}
+
+                <div class="input-group-neon">
+                    <label for="{{ form.username.id_for_label }}">Usuário</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-person input-icon"></i>
+                        {{ form.username }}
+                    </div>
+                    {% if form.username.errors %}
+                        <small class="error-text">{{ form.username.errors.0 }}</small>
+                    {% endif %}
+                </div>
+
+                <div class="input-group-neon">
+                    <label for="{{ form.password.id_for_label }}">Senha</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-lock input-icon"></i>
+                        {{ form.password }}
+                    </div>
+                    {% if form.password.errors %}
+                        <small class="error-text">{{ form.password.errors.0 }}</small>
+                    {% endif %}
+                </div>
+
+                <div class="auth-options">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember">
+                        <span>Lembrar-me</span>
+                    </label>
+                    <a href="#" class="forgot-link">Esqueceu a senha?</a>
+                </div>
+
+                <button type="submit" class="btn-register-neon">
+                    Entrar <i class="bi bi-arrow-right"></i>
+                </button>
+            </form>
+
+            <!-- Rodapé do Card -->
+            <div class="auth-footer">
+                <p>Não tem conta? <a href="{% url 'users:register' %}" class="register-link">Cadastre-se</a></p>
+            </div>
+        </div>
+
+        <!-- Card Decorativo (informações laterais) -->
+        <div class="promo-card">
+            <i class="bi bi-calendar-event promo-icon"></i>
+            <h3>Acompanhe seus animes</h3>
+            <p>Nunca mais perca um episódio. Receba notificações dos seus animes favoritos.</p>
+            
+            <div class="promo-features">
+                <div class="promo-item">
+                    <i class="bi bi-bell"></i>
+                    <span>Notificações</span>
+                </div>
+                <div class="promo-item">
+                    <i class="bi bi-heart"></i>
+                    <span>Favoritos</span>
+                </div>
+                <div class="promo-item">
+                    <i class="bi bi-chat-dots"></i>
+                    <span>Comentários</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .auth-wrapper {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        overflow: hidden;
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a0d2e 50%, #0a0a0a 100%);
+    }
+
+    .auth-glow {
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+        50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.7; }
+    }
+
+    .register-container {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        max-width: 480px;
+        width: 100%;
+    }
+
+    @media (min-width: 992px) {
+        .register-container {
+            grid-template-columns: 480px 320px;
+            max-width: 840px;
+        }
+    }
+
+    .register-glass-card {
+        background: rgba(15, 15, 35, 0.8);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 3rem 2.5rem;
+        border: 1px solid rgba(168, 85, 247, 0.2);
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .brand-logo {
+        display: inline-block;
+        font-size: 1.8rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #a855f7, #ec4899);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-decoration: none;
+        margin-bottom: 1rem;
+        letter-spacing: -0.02em;
+    }
+
+    .brand-logo .dot {
+        color: #ec4899;
+        -webkit-text-fill-color: #ec4899;
+    }
+
+    .welcome-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 1rem 0 0.5rem;
+    }
+
+    .welcome-sub {
+        color: #9ca3af;
+        font-size: 0.95rem;
+    }
+
+    .social-login-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .social-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.03);
+        color: #e5e7eb;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .social-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(168, 85, 247, 0.5);
+        transform: translateY(-2px);
+    }
+
+    .social-btn.google:hover {
+        border-color: #ea4335;
+    }
+
+    .social-btn.discord:hover {
+        border-color: #5865f2;
+    }
+
+    .divider-neon {
+        position: relative;
+        text-align: center;
+        margin: 2rem 0 1.5rem;
+        color: #6b7280;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+    }
+
+    .divider-neon::before,
+    .divider-neon::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        width: calc(50% - 100px);
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.3));
+    }
+
+    .divider-neon::before {
+        left: 0;
+    }
+
+    .divider-neon::after {
+        right: 0;
+        background: linear-gradient(90deg, rgba(168, 85, 247, 0.3), transparent);
+    }
+
+    .glass-alert {
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .glass-alert i {
+        font-size: 1.25rem;
+        color: #f87171;
+    }
+
+    .glass-alert strong {
+        display: block;
+        color: #fca5a5;
+        margin-bottom: 0.25rem;
+    }
+
+    .glass-alert .small {
+        color: #d1d5db;
+        font-size: 0.875rem;
+    }
+
+    .auth-form {
+        margin-top: 1.5rem;
+    }
+
+    .input-group-neon {
+        margin-bottom: 1.5rem;
+    }
+
+    .input-group-neon label {
+        display: block;
+        color: #d1d5db;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+        font-size: 1.1rem;
+        pointer-events: none;
+    }
+
+    .input-wrapper input {
+        width: 100%;
+        padding: 0.875rem 1rem 0.875rem 2.75rem;
+        border-radius: 12px;
+        border: 1px solid rgba(168, 85, 247, 0.2);
+        background: rgba(15, 15, 35, 0.6);
+        color: #fff;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .input-wrapper input:focus {
+        outline: none;
+        border-color: #a855f7;
+        box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+        background: rgba(15, 15, 35, 0.8);
+    }
+
+    .error-text {
+        display: block;
+        color: #f87171;
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+    }
+
+    .auth-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        font-size: 0.875rem;
+    }
+
+    .remember-me {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #9ca3af;
+        cursor: pointer;
+    }
+
+    .remember-me input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+    }
+
+    .forgot-link {
+        color: #a855f7;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+
+    .forgot-link:hover {
+        color: #ec4899;
+    }
+
+    .btn-register-neon {
+        width: 100%;
+        padding: 1rem;
+        border-radius: 12px;
+        border: none;
+        background: linear-gradient(135deg, #a855f7, #ec4899);
+        color: #fff;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 20px rgba(168, 85, 247, 0.3);
+    }
+
+    .btn-register-neon:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 30px rgba(168, 85, 247, 0.5);
+    }
+
+    .btn-register-neon:active {
+        transform: translateY(0);
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        color: #9ca3af;
+        font-size: 0.9rem;
+    }
+
+    .register-link {
+        color: #a855f7;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s;
+    }
+
+    .register-link:hover {
+        color: #ec4899;
+    }
+
+    /* Card Promocional Lateral */
+    .promo-card {
+        display: none;
+        background: rgba(168, 85, 247, 0.05);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 2.5rem;
+        border: 1px solid rgba(168, 85, 247, 0.2);
+        text-align: center;
+    }
+
+    @media (min-width: 992px) {
+        .promo-card {
+            display: block;
+        }
+    }
+
+    .promo-icon {
+        font-size: 3rem;
+        color: #a855f7;
+        margin-bottom: 1rem;
+    }
+
+    .promo-card h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 1rem;
+    }
+
+    .promo-card p {
+        color: #9ca3af;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .promo-features {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .promo-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        color: #d1d5db;
+    }
+
+    .promo-item i {
+        color: #a855f7;
+        font-size: 1.25rem;
+    }
+
+    /* Responsivo */
+    @media (max-width: 480px) {
+        .register-glass-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .welcome-title {
+            font-size: 1.5rem;
+        }
+
+        .social-login-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
