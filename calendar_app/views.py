@@ -12,10 +12,51 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
+def calendario_semanal(request):
+    """
+    Mostra o calendário semanal com animes organizados por dia da semana.
+    Usa a Jikan API para buscar os animes de cada dia.
+    URL: /calendario/
+    """
+    logger.info("[CALENDARIO SEMANAL] Buscando dados da Jikan API...")
+    
+    # Busca animes para cada dia da semana
+    calendario = {
+        "monday": [],
+        "tuesday": [],
+        "wednesday": [],
+        "thursday": [],
+        "friday": [],
+        "saturday": [],
+        "sunday": [],
+    }
+    
+    # Para cada dia da semana, busca os animes e faz parse
+    for weekday_name in calendario.keys():
+        try:
+            animes = AnimeScheduleService.get_animes_by_weekday(weekday_name)
+            # Faz parse dos dados
+            calendario[weekday_name] = [
+                AnimeScheduleService.parse_anime_data(anime)
+                for anime in animes
+            ]
+            logger.info(f"[{weekday_name.upper()}] {len(calendario[weekday_name])} animes encontrados")
+        except Exception as e:
+            logger.error(f"[ERRO] Falha ao buscar animes de {weekday_name}: {str(e)}")
+            calendario[weekday_name] = []
+    
+    context = {
+        "calendario": calendario,
+    }
+    
+    return render(request, "calendar_app/calendario.html", context)
+
+
+@login_required
 def month_current(request):
     """
     Redireciona para a visualização do mês atual.
-    URL: /calendario/
+    URL: /calendario/mes/
     """
     today = date.today()
     return month_view(request, year=today.year, month=today.month)

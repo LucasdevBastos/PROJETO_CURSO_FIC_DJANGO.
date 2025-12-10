@@ -5,6 +5,11 @@ from . import views
 app_name = "calendar_app"
 
 urlpatterns = [
-    path("", views.month_current, name="month_current"),
-    path("<int:year>/<int:month>/", views.month_view, name="month_view"),
+    # Calendário semanal (padrão) - /calendario/
+    path("", views.calendario_semanal, name="calendario_semanal"),
+    
+    # Calendário mensal - /calendario/mes/
+    path("mes/", views.month_current, name="month_current"),
+    path("mes/<int:year>/<int:month>/", views.month_view, name="month_view"),
 ]
+
