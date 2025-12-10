@@ -81,15 +81,15 @@ def month_view(request, year, month):
             # Busca animes para este dia da Jikan API
             day_animes = AnimeScheduleService.get_animes_for_calendar_day(d, parse=True)
             
-            # Limita a 5 animes por dia para não ficar muito poluído
-            day_animes = day_animes[:5]
+            # SEM LIMITE - Mostra todos os animes do dia
+            # (Se quiser limitar futuramente, use: day_animes = day_animes[:X])
 
             week_data.append({
                 "date": d,
                 "in_month": d.month == month,
                 "is_today": (d == today),
-                "animes": day_animes,  # Mudei de "airings" para "animes"
-                "anime_count": len(day_animes),  # Quantidade total de animes
+                "animes": day_animes,
+                "anime_count": len(day_animes),
             })
         weeks.append(week_data)
 

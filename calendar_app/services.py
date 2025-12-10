@@ -52,25 +52,43 @@ class AnimeScheduleService:
         
         try:
             logger.info(f"[API CALL] Buscando agenda para {weekday_name}")
-            response = requests.get(
-                JIKAN_SCHEDULE_URL,
-                params={
-                    "filter": weekday_name,
-                    "limit": 25,  # Aumentei de 12 para 25
-                    "page": 1,
-                },
-                timeout=JIKAN_TIMEOUT,
-            )
-            response.raise_for_status()
             
-            data = response.json()
-            animes = data.get("data", [])
+            all_animes = []
+            page = 1
+            max_pages = 10  # Limite de segurança para não fazer requisições infinitas
+            
+            while page <= max_pages:
+                response = requests.get(
+                    JIKAN_SCHEDULE_URL,
+                    params={
+                        "filter": weekday_name,
+                        "limit": 25,  # Máximo por página
+                        "page": page,
+                    },
+                    timeout=JIKAN_TIMEOUT,
+                )
+                response.raise_for_status()
+                
+                data = response.json()
+                animes_page = data.get("data", [])
+                
+                if not animes_page:  # Se não tem mais animes, para
+                    break
+                
+                all_animes.extend(animes_page)
+                
+                # Verifica se tem próxima página
+                pagination = data.get("pagination", {})
+                if not pagination.get("has_next_page", False):
+                    break
+                
+                page += 1
             
             # Cachea os resultados
-            cache.set(cache_key, animes, CACHE_DURATION)
-            logger.info(f"[SUCCESS] {len(animes)} animes encontrados para {weekday_name}")
+            cache.set(cache_key, all_animes, CACHE_DURATION)
+            logger.info(f"[SUCCESS] {len(all_animes)} animes encontrados para {weekday_name} ({page} páginas)")
             
-            return animes
+            return all_animes
             
         except requests.exceptions.Timeout:
             logger.error(f"[TIMEOUT] Jikan API timeout para {weekday_name}")

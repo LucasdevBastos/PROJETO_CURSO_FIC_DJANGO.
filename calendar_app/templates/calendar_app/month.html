@@ -53,11 +53,11 @@
 
                         {% if day.animes %}
                         <div class="desktop-preview-grid">
-                            {% for anime in day.animes|slice:":3" %}
+                            {% for anime in day.animes|slice:":6" %}
                                 <div class="preview-poster" style="background-image: url('{{ anime.image_url }}');"></div>
                             {% endfor %}
-                            {% if day.anime_count > 3 %}
-                                <div class="preview-more">+{{ day.anime_count|add:"-3" }}</div>
+                            {% if day.anime_count > 6 %}
+                                <div class="preview-more">+{{ day.anime_count|add:"-6" }}</div>
                             {% endif %}
                         </div>
                         {% endif %}
