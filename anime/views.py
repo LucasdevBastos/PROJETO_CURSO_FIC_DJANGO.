@@ -131,4 +131,3 @@ def anime_list(request):
         "total_animes": len(animes_list),
     }
     return render(request, "anime_list.html", context)
-    return render(request, "anime_list.html", context)
