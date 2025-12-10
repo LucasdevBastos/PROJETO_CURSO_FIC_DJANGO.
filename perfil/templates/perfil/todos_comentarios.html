@@ -24,47 +24,66 @@
         </div>
 
         <!-- Listagem de Comentários -->
-        {% if comentarios %}
+        {% if comentarios_enriquecidos %}
             <div class="comments-full-list">
-                {% for coment in comentarios %}
+                {% for item in comentarios_enriquecidos %}
                     <div class="comment-full-card">
-                        <!-- Cabeçalho do Comentário -->
-                        <div class="comment-header-full">
-                            <div class="anime-ref">
-                                <a href="{% url 'core:anime_detail' coment.anime_id %}" class="anime-link-full">
-                                    <i class="bi bi-film"></i> Ver Anime #{{ coment.anime_id }}
-                                </a>
-                            </div>
-                            <div class="comment-meta">
-                                {% if coment.nota %}
-                                    <span class="rating-badge">★ {{ coment.nota }}/10</span>
+                        <!-- Card do Anime (Lateral) -->
+                        <div class="anime-card-mini">
+                            <a href="{% url 'core:anime_detail' item.comentario.anime_id %}" class="anime-thumb-link">
+                                {% if item.anime.images.jpg.image_url %}
+                                    <img src="{{ item.anime.images.jpg.image_url }}" alt="{{ item.anime.title }}" loading="lazy">
+                                {% else %}
+                                    <div class="no-image-mini">
+                                        <i class="bi bi-image"></i>
+                                    </div>
                                 {% endif %}
-                                <span class="date-badge">{{ coment.criado_em|date:"d de M de Y" }}</span>
-                                {% if coment.atualizado_em != coment.criado_em %}
-                                    <span class="edited-badge"><i class="bi bi-pencil"></i> Editado</span>
+                                {% if item.anime.score %}
+                                    <div class="score-mini">★ {{ item.anime.score }}</div>
                                 {% endif %}
-                            </div>
+                            </a>
                         </div>
 
                         <!-- Conteúdo do Comentário -->
-                        <div class="comment-content-full">
-                            <p>{{ coment.texto }}</p>
-                        </div>
+                        <div class="comment-main-content">
+                            <!-- Cabeçalho -->
+                            <div class="comment-header-full">
+                                <div class="anime-ref">
+                                    <a href="{% url 'core:anime_detail' item.comentario.anime_id %}" class="anime-link-full">
+                                        <i class="bi bi-film"></i> {{ item.anime.title|truncatechars:50 }}
+                                    </a>
+                                </div>
+                                <div class="comment-meta">
+                                    {% if item.comentario.nota %}
+                                        <span class="rating-badge">★ {{ item.comentario.nota }}/10</span>
+                                    {% endif %}
+                                    <span class="date-badge">{{ item.comentario.criado_em|date:"d/m/Y" }}</span>
+                                    {% if item.comentario.atualizado_em != item.comentario.criado_em %}
+                                        <span class="edited-badge"><i class="bi bi-pencil"></i> Editado</span>
+                                    {% endif %}
+                                </div>
+                            </div>
 
-                        <!-- Status e Ações -->
-                        <div class="comment-footer">
-                            {% if coment.is_deleted %}
-                                <span class="status-deleted">
-                                    <i class="bi bi-trash"></i> Comentário Removido
-                                </span>
-                            {% else %}
-                                <span class="status-active">
-                                    <i class="bi bi-check-circle"></i> Ativo
-                                </span>
-                                <a href="{% url 'core:anime_detail' coment.anime_id %}" class="action-link">
-                                    Ir para Anime <i class="bi bi-arrow-right"></i>
-                                </a>
-                            {% endif %}
+                            <!-- Texto do Comentário -->
+                            <div class="comment-content-full">
+                                <p>{{ item.comentario.texto }}</p>
+                            </div>
+
+                            <!-- Status e Ações -->
+                            <div class="comment-footer">
+                                {% if item.comentario.is_deleted %}
+                                    <span class="status-deleted">
+                                        <i class="bi bi-trash"></i> Comentário Removido
+                                    </span>
+                                {% else %}
+                                    <span class="status-active">
+                                        <i class="bi bi-check-circle"></i> Ativo
+                                    </span>
+                                    <a href="{% url 'core:anime_detail' item.comentario.anime_id %}" class="action-link">
+                                        Ir para Anime <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 {% endfor %}
@@ -110,6 +129,17 @@
                 </nav>
             {% endif %}
 
+        {% elif comentarios %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="bi bi-exclamation-circle"></i>
+                </div>
+                <h3>Erro ao carregar dados</h3>
+                <p>Não foi possível buscar informações dos animes. Tente novamente mais tarde.</p>
+                <a href="{% url 'perfil:ver' usuario.username %}" class="btn-neon">
+                    Voltar para Perfil
+                </a>
+            </div>
         {% else %}
             <div class="empty-state">
                 <div class="empty-icon">
@@ -198,13 +228,71 @@
         background: var(--bg-card);
         border: 1px solid var(--border-glass);
         border-radius: 12px;
-        padding: 2rem;
+        padding: 1.5rem;
         transition: all 0.3s;
+        display: flex;
+        gap: 1.5rem;
     }
 
     .comment-full-card:hover {
         border-color: var(--cyan-lumi);
         box-shadow: 0 0 20px rgba(0, 210, 211, 0.1);
+    }
+
+    /* --- ANIME CARD MINI --- */
+    .anime-card-mini {
+        flex-shrink: 0;
+        width: 120px;
+    }
+
+    .anime-thumb-link {
+        display: block;
+        position: relative;
+        width: 100%;
+        aspect-ratio: 2/3;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #111;
+        transition: transform 0.3s;
+    }
+
+    .anime-thumb-link:hover {
+        transform: scale(1.05);
+    }
+
+    .anime-thumb-link img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .no-image-mini {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: #333;
+    }
+
+    .score-mini {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #f1c40f;
+        padding: 3px 6px;
+        border-radius: 4px;
+        font-weight: 700;
+        font-size: 0.75rem;
+        backdrop-filter: blur(4px);
+    }
+
+    /* --- COMMENT MAIN CONTENT --- */
+    .comment-main-content {
+        flex: 1;
+        min-width: 0; /* Permite que o flex item encolha */
     }
 
     /* Header do comentário */
@@ -402,6 +490,17 @@
             font-size: 1.8rem;
         }
 
+        .comment-full-card {
+            padding: 1.5rem;
+            flex-direction: column;
+        }
+
+        .anime-card-mini {
+            width: 100%;
+            max-width: 200px;
+            margin: 0 auto;
+        }
+
         .comment-header-full {
             flex-direction: column;
             align-items: flex-start;
@@ -411,9 +510,23 @@
             flex-direction: column;
             align-items: flex-start;
         }
+    }
+
+    @media (max-width: 480px) {
+        .anilumi-container {
+            padding: 0 1rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+        }
 
         .comment-full-card {
-            padding: 1.5rem;
+            padding: 1rem;
+        }
+
+        .anime-card-mini {
+            max-width: 150px;
         }
     }
 </style>

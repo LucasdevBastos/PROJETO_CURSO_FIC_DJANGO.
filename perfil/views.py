@@ -7,6 +7,7 @@ from .models import Perfil
 from .forms import PerfilForm
 from comentarios.models import Comentario
 from core.models import Favorito
+from core.jikan_api import JikanAPI
 
 
 def perfil_usuario(request, username):
@@ -102,6 +103,7 @@ def todos_comentarios_usuario(request, username):
     - 10 comentários por página
     - Apenas comentários não deletados
     - Ordenado por data decrescente
+    - Enriquecido com dados da API
     """
     usuario = get_object_or_404(User, username=username)
     
@@ -115,10 +117,21 @@ def todos_comentarios_usuario(request, username):
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
     
+    # Enriquecer com dados da API
+    comentarios_enriquecidos = []
+    for coment in page_obj.object_list:
+        anime = JikanAPI.get_anime_by_id(coment.anime_id)
+        if anime:
+            comentarios_enriquecidos.append({
+                'comentario': coment,
+                'anime': anime,
+            })
+    
     context = {
         'usuario': usuario,
         'page_obj': page_obj,
         'comentarios': page_obj.object_list,
+        'comentarios_enriquecidos': comentarios_enriquecidos,
         'total': paginator.count,
     }
     
@@ -130,6 +143,7 @@ def todos_favoritos_usuario(request, username):
     Listar todos os favoritos de um usuário com paginação
     - 12 favoritos por página
     - Ordenado por data decrescente
+    - Enriquecido com dados da API
     """
     usuario = get_object_or_404(User, username=username)
     
@@ -140,10 +154,21 @@ def todos_favoritos_usuario(request, username):
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
     
+    # Enriquecer com dados da API
+    animes_favoritos = []
+    for fav in page_obj.object_list:
+        anime = JikanAPI.get_anime_by_id(fav.anime_id)
+        if anime:
+            animes_favoritos.append({
+                'favorito': fav,
+                'anime': anime,
+            })
+    
     context = {
         'usuario': usuario,
         'page_obj': page_obj,
         'favoritos': page_obj.object_list,
+        'animes_favoritos': animes_favoritos,
         'total': paginator.count,
     }
     

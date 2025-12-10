@@ -393,10 +393,42 @@
 @media (max-width: 768px) {
     .anilumi-container { padding: 0 1rem; }
     .catalog-header h1 { font-size: 2rem; }
-    .search-section { padding: 0 1rem; }
-    .glass-search-bar { padding: 0.4rem 0.4rem 0.4rem 1rem; }
+    .search-section { padding: 0 1rem; max-width: 100%; }
+    .glass-search-bar { 
+        padding: 0.5rem 0.5rem 0.5rem 1.2rem; 
+        border-radius: 40px;
+    }
+    .search-icon { 
+        font-size: 1.1rem; 
+        margin-right: 0.8rem; 
+    }
+    .search-input { 
+        font-size: 16px; /* Evita zoom no iOS */
+        min-width: 0; /* Permite shrink */
+    }
+    .search-btn { 
+        width: 44px; 
+        height: 44px; 
+        font-size: 1.1rem;
+        flex-shrink: 0; /* Mantém tamanho quadrado */
+    }
     .anime-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
     .filters-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+}
+
+/* Mobile extra pequeno (iPhone SE, etc) */
+@media (max-width: 480px) {
+    .glass-search-bar { 
+        padding: 0.4rem 0.4rem 0.4rem 1rem; 
+    }
+    .search-icon { 
+        margin-right: 0.6rem; 
+    }
+    .search-btn { 
+        width: 40px; 
+        height: 40px; 
+        font-size: 1rem;
+    }
 }
 </style>
 

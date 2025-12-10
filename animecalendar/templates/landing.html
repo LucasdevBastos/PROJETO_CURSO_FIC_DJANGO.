@@ -404,13 +404,41 @@
             }
 
             /* 5. Input Text Size (Evita zoom no iOS) */
-            .search-box input { font-size: 16px; } 
-            .search-box button { padding: 0 18px; }
+            .search-box { gap: 8px; flex-wrap: nowrap; }
+            .search-box input { 
+                font-size: 16px; 
+                padding: 12px 15px;
+                min-width: 0; /* Permite shrink */
+            } 
+            .search-box button { 
+                padding: 0;
+                min-width: 48px;
+                width: 48px;
+                height: 48px;
+                flex-shrink: 0; /* Mantém tamanho do botão */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
             .search-box button span { display: none; } /* Só ícone */
 
             /* 6. Swiper Clean */
             .swiper-button-next, .swiper-button-prev { display: none; } /* Remove setas */
             .swiper { padding-bottom: 30px; }
+        }
+
+        /* Mobile Extra Pequeno */
+        @media (max-width: 480px) {
+            .search-box { gap: 6px; }
+            .search-box input { 
+                padding: 10px 12px;
+                font-size: 15px;
+            }
+            .search-box button { 
+                min-width: 44px;
+                width: 44px;
+                height: 44px;
+            }
         }
     </style>
 </head>
