@@ -146,6 +146,63 @@
                         </article>
                     {% endfor %}
                 </div>
+
+                <!-- ===== PAGINAÇÃO ===== -->
+                {% if page_obj.paginator.num_pages > 1 %}
+                    <div class="pagination-container">
+                        <nav class="pagination-nav">
+                            <!-- Primeira Página -->
+                            {% if page_obj.has_previous %}
+                                <a href="?page=1{% if query %}&q={{ query }}{% endif %}{% if selected_genre %}&genre={{ selected_genre }}{% endif %}" 
+                                   class="page-link page-first" title="Primeira página">
+                                    <i class="bi bi-chevron-double-left"></i>
+                                </a>
+                            {% endif %}
+
+                            <!-- Página Anterior -->
+                            {% if page_obj.has_previous %}
+                                <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_genre %}&genre={{ selected_genre }}{% endif %}" 
+                                   class="page-link page-prev">
+                                    <i class="bi bi-chevron-left"></i> Anterior
+                                </a>
+                            {% endif %}
+
+                            <!-- Números de Página -->
+                            <div class="page-numbers">
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <span class="page-link active">{{ num }}</span>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if selected_genre %}&genre={{ selected_genre }}{% endif %}" 
+                                           class="page-link">{{ num }}</a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+
+                            <!-- Próxima Página -->
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_genre %}&genre={{ selected_genre }}{% endif %}" 
+                                   class="page-link page-next">
+                                    Próxima <i class="bi bi-chevron-right"></i>
+                                </a>
+                            {% endif %}
+
+                            <!-- Última Página -->
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}{% if selected_genre %}&genre={{ selected_genre }}{% endif %}" 
+                                   class="page-link page-last" title="Última página">
+                                    <i class="bi bi-chevron-double-right"></i>
+                                </a>
+                            {% endif %}
+                        </nav>
+
+                        <!-- Info de Paginação -->
+                        <div class="pagination-info">
+                            Mostrando {{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ total_animes }} animes
+                            <span class="page-badge">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                        </div>
+                    </div>
+                {% endif %}
             {% else %}
                 <div class="empty-state-glass">
                     <div class="icon-box-large"><i class="bi bi-search"></i></div>
@@ -428,6 +485,139 @@
         width: 40px; 
         height: 40px; 
         font-size: 1rem;
+    }
+}
+
+/* --- PAGINAÇÃO --- */
+.pagination-container {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-glass);
+}
+
+.pagination-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 45px;
+    height: 45px;
+    padding: 0 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-glass);
+    border-radius: 10px;
+    color: var(--text-main);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.page-link:hover {
+    background: rgba(0, 210, 211, 0.1);
+    border-color: var(--cyan-lumi);
+    color: var(--cyan-lumi);
+    transform: translateY(-2px);
+}
+
+.page-link.active {
+    background: linear-gradient(135deg, var(--cyan-lumi), #00a8ff);
+    border-color: var(--cyan-lumi);
+    color: #000;
+    font-weight: 700;
+    cursor: default;
+    box-shadow: 0 0 20px var(--cyan-glow);
+}
+
+.page-link.active:hover {
+    transform: none;
+}
+
+.page-numbers {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.page-first, .page-last {
+    min-width: 45px;
+    padding: 0;
+}
+
+.page-prev, .page-next {
+    padding: 0 1.2rem;
+    font-weight: 600;
+}
+
+.pagination-info {
+    text-align: center;
+    color: var(--text-sec);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.page-badge {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    background: rgba(0, 210, 211, 0.1);
+    border: 1px solid rgba(0, 210, 211, 0.3);
+    border-radius: 20px;
+    color: var(--cyan-lumi);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Responsive Paginação */
+@media (max-width: 768px) {
+    .pagination-nav {
+        gap: 0.3rem;
+    }
+    
+    .page-link {
+        min-width: 40px;
+        height: 40px;
+        font-size: 0.9rem;
+        padding: 0 0.8rem;
+    }
+    
+    .page-prev, .page-next {
+        padding: 0 0.8rem;
+    }
+    
+    .pagination-info {
+        font-size: 0.85rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-numbers {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .page-first, .page-prev {
+        order: 1;
+    }
+    
+    .page-next, .page-last {
+        order: 2;
     }
 }
 </style>

@@ -2,6 +2,7 @@
 import requests
 from django.shortcuts import render
 from django.db.models import Q
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Anime
 
 
@@ -121,13 +122,26 @@ def anime_list(request):
             'status': anime.get_status_display() if hasattr(anime, 'get_status_display') else '',
             'tipo': anime.get_tipo_display() if hasattr(anime, 'get_tipo_display') else '',
         })
+    
+    # ===== PAGINAÇÃO =====
+    paginator = Paginator(animes_list, 20)  # 20 animes por página
+    page_number = request.GET.get('page', 1)
+    
+    try:
+        animes_paginated = paginator.page(page_number)
+    except PageNotAnInteger:
+        animes_paginated = paginator.page(1)
+    except EmptyPage:
+        animes_paginated = paginator.page(paginator.num_pages)
 
     context = {
-        "animes": animes_list,
+        "animes": animes_paginated,
         "favoritos": favoritos,
         "genres": genres_list,
         "selected_genre": selected_genre,
         "query": query,
         "total_animes": len(animes_list),
+        "paginator": paginator,
+        "page_obj": animes_paginated,
     }
     return render(request, "anime_list.html", context)
