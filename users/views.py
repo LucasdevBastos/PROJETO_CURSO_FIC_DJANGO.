@@ -1,6 +1,7 @@
 # users/views.py
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
 from django.contrib import messages
 
 def register(request):
@@ -8,8 +9,10 @@ def register(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            messages.success(request, "Conta criada com sucesso! Você já pode fazer login.")
-            return redirect("users:login")
+            # Faz login automático após cadastro
+            login(request, user)
+            messages.success(request, "Conta criada com sucesso! Bem-vindo(a)!")
+            return redirect("anime:anime_list")  # Redireciona direto para lista de animes
     else:
         form = UserCreationForm()
 
