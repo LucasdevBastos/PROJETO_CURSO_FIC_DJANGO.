@@ -162,6 +162,19 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 WHITENOISE_AUTOREFRESH = DEBUG  # Auto-refresh apenas em desenvolvimento
 WHITENOISE_USE_FINDERS = DEBUG  # Usa finders apenas em desenvolvimento
 
+# Cache de arquivos estáticos (1 ano para arquivos com hash)
+WHITENOISE_MAX_AGE = 31536000  # 1 ano
+
+# Compressão agressiva para produção
+WHITENOISE_KEEP_ONLY_HASHED_FILES = not DEBUG
+
+# Mime types corretos para prevenir problemas de CSS
+WHITENOISE_MIMETYPES = {
+    '.css': 'text/css; charset=utf-8',
+    '.js': 'application/javascript; charset=utf-8',
+    '.json': 'application/json; charset=utf-8',
+}
+
 # Cria o diretório staticfiles se não existir (evita warnings)
 import os
 os.makedirs(STATIC_ROOT, exist_ok=True)
