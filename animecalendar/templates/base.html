@@ -158,6 +158,87 @@
       min-height: calc(100vh - 72px - 60px); /* navbar + footer aproximado */
     }
 
+    /* ===== DROPDOWN PERFIL - FIX MOBILE ===== */
+    .dropdown-menu {
+      background: #1a1a1a;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 0.75rem;
+      padding: 0.5rem 0;
+      min-width: 200px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      z-index: 9999 !important;
+    }
+
+    .dropdown-menu.dropdown-menu-end {
+      right: 0 !important;
+      left: auto !important;
+    }
+
+    .dropdown-item {
+      color: #e5e7eb;
+      padding: 0.6rem 1.2rem;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .dropdown-item:hover,
+    .dropdown-item:focus {
+      background: rgba(168, 85, 247, 0.15);
+      color: var(--primary);
+    }
+
+    .dropdown-item i {
+      width: 1.2rem;
+      text-align: center;
+    }
+
+    .dropdown-divider {
+      border-color: rgba(148, 163, 184, 0.25);
+      margin: 0.5rem 0;
+    }
+
+    /* Fix para mobile - garante que dropdown não seja cortado */
+    @media (max-width: 768px) {
+      .navbar .dropdown {
+        position: static;
+      }
+
+      .dropdown-menu {
+        position: fixed !important;
+        right: 1rem !important;
+        left: auto !important;
+        top: 60px !important;
+        min-width: 220px;
+        max-width: calc(100vw - 2rem);
+        transform: none !important;
+        z-index: 9999 !important;
+      }
+
+      .dropdown-menu.show {
+        display: block;
+        animation: slideDown 0.2s ease-out;
+      }
+
+      /* Animação suave de abertura */
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Garante que o navbar toggle também funcione bem */
+      .navbar-toggler {
+        z-index: 9998;
+      }
+    }
+
     /* ===== FOOTER STYLES ===== */
     footer {
       background: #0a0a0a;
