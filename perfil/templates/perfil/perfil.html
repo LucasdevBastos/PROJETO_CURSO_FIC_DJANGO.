@@ -89,21 +89,18 @@
             
             <!-- ABA: FAVORITOS -->
             <div class="tab-pane fade show active" id="favoritos" role="tabpanel">
-                {% if favoritos %}
+                {% if favoritos_enriquecidos %}
                     <div class="anime-grid-mini">
-                        {% for fav in favoritos %}
+                        {% for item in favoritos_enriquecidos %}
                             <article class="mini-anime-card">
-                                <a href="{% url 'core:anime_detail' fav.anime_id %}" class="card-link-wrapper">
+                                <a href="{% url 'core:anime_detail' item.favorito.anime_id %}" class="card-link-wrapper">
                                     <div class="mini-poster">
-                                        <!-- Placeholder se não tiver imagem no objeto fav (adapte se necessário) -->
-                                        <div class="poster-placeholder">
-                                            <span>#{{ fav.anime_id }}</span>
-                                            <i class="bi bi-play-fill icon-play"></i>
-                                        </div>
+                                        <img src="{{ item.anime.images.jpg.image_url }}" alt="{{ item.anime.title }}" class="anime-poster-img">
+                                        <i class="bi bi-play-fill icon-play"></i>
                                     </div>
                                     <div class="mini-info">
-                                        <span class="anime-id">ID: {{ fav.anime_id }}</span>
-                                        <span class="date-added">{{ fav.criado_em|date:"d/m/Y" }}</span>
+                                        <span class="anime-id">{{ item.anime.title|truncatewords:3 }}</span>
+                                        <span class="date-added">{{ item.favorito.criado_em|date:"d/m/Y" }}</span>
                                     </div>
                                 </a>
                             </article>
@@ -127,29 +124,36 @@
 
             <!-- ABA: COMENTÁRIOS -->
             <div class="tab-pane fade" id="comentarios" role="tabpanel">
-                {% if comentarios_recentes %}
+                {% if comentarios_enriquecidos %}
                     <div class="comments-feed">
-                        {% for coment in comentarios_recentes %}
+                        {% for item in comentarios_enriquecidos %}
                             <div class="comment-item">
-                                <div class="comment-anime-ref">
-                                    <a href="{% url 'core:anime_detail' coment.anime_id %}" class="anime-link">
-                                        <i class="bi bi-film"></i> Anime #{{ coment.anime_id }}
+                                <div class="comment-with-poster">
+                                    <a href="{% url 'core:anime_detail' item.comentario.anime_id %}" class="anime-poster-thumb">
+                                        <img src="{{ item.anime.images.jpg.image_url }}" alt="{{ item.anime.title }}">
                                     </a>
-                                    <span class="comment-date">{{ coment.criado_em|date:"d M Y, H:i" }}</span>
-                                </div>
-                                
-                                <div class="comment-content-box">
-                                    {% if coment.nota %}
-                                        <div class="user-rating">
-                                            ★ {{ coment.nota }}
+                                    <div class="comment-main-content">
+                                        <div class="comment-anime-ref">
+                                            <a href="{% url 'core:anime_detail' item.comentario.anime_id %}" class="anime-link">
+                                                <i class="bi bi-film"></i> {{ item.anime.title|truncatewords:5 }}
+                                            </a>
+                                            <span class="comment-date">{{ item.comentario.criado_em|date:"d M Y, H:i" }}</span>
                                         </div>
-                                    {% endif %}
-                                    <p>{{ coment.texto|truncatewords:40 }}</p>
+                                        
+                                        <div class="comment-content-box">
+                                            {% if item.comentario.nota %}
+                                                <div class="user-rating">
+                                                    ★ {{ item.comentario.nota }}
+                                                </div>
+                                            {% endif %}
+                                            <p>{{ item.comentario.texto|truncatewords:40 }}</p>
+                                        </div>
+                                        
+                                        <a href="{% url 'core:anime_detail' item.comentario.anime_id %}" class="view-context-btn">
+                                            Ver no Anime <i class="bi bi-arrow-right-short"></i>
+                                        </a>
+                                    </div>
                                 </div>
-                                
-                                <a href="{% url 'core:anime_detail' coment.anime_id %}" class="view-context-btn">
-                                    Ver no Anime <i class="bi bi-arrow-right-short"></i>
-                                </a>
                             </div>
                         {% endfor %}
                     </div>
@@ -324,14 +328,22 @@
     width: 100%; aspect-ratio: 2/3;
     background: #111; position: relative;
     display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
 }
-/* Placeholder estilizado caso o objeto 'fav' não tenha imagem direta */
-.poster-placeholder {
-    color: var(--text-sec); text-align: center; font-size: 0.9rem;
+.anime-poster-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: 0.3s;
+}
+.mini-anime-card:hover .anime-poster-img {
+    transform: scale(1.1);
 }
 .icon-play {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
     font-size: 2rem; color: white; opacity: 0; transition: 0.3s;
+    z-index: 2;
 }
 .mini-anime-card:hover .icon-play { opacity: 1; }
 
@@ -349,6 +361,35 @@
     transition: 0.3s;
 }
 .comment-item:hover { background: rgba(255,255,255,0.04); }
+
+.comment-with-poster {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+.anime-poster-thumb {
+    flex-shrink: 0;
+    width: 60px;
+    height: 85px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid var(--border-glass);
+    transition: 0.3s;
+}
+.anime-poster-thumb:hover {
+    border-color: var(--cyan-lumi);
+    transform: scale(1.05);
+}
+.anime-poster-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.comment-main-content {
+    flex: 1;
+    min-width: 0;
+}
 
 .comment-anime-ref {
     display: flex; justify-content: space-between; align-items: center;

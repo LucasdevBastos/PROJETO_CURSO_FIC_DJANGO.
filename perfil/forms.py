@@ -19,7 +19,7 @@ class PerfilForm(forms.ModelForm):
             }),
             'bio': forms.Textarea(attrs={
                 'class': 'form-control',
-                'placeholder': 'Conte-nos um pouco sobre você...',
+                'placeholder': '',
                 'rows': 3,
                 'maxlength': 500,
             }),

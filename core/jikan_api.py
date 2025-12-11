@@ -7,6 +7,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Importa tradutor (instalar: pip install deep-translator)
+try:
+    from deep_translator import GoogleTranslator
+    TRADUTOR_DISPONIVEL = True
+except ImportError:
+    TRADUTOR_DISPONIVEL = False
+    logger.warning("[TRADUTOR] deep-translator não instalado. Sinopses não serão traduzidas.")
+
 
 class JikanAPI:
     """Classe para consumir a API Jikan v4"""
@@ -40,6 +48,32 @@ class JikanAPI:
             return {}
     
     @staticmethod
+    def _traduzir_texto(texto):
+        """
+        Traduz texto do inglês para português brasileiro
+        """
+        if not texto or not TRADUTOR_DISPONIVEL:
+            return texto
+        
+        try:
+            # Usa cache para traduções
+            cache_key = f"trad_{hash(texto)}"
+            cached = cache.get(cache_key)
+            if cached:
+                return cached
+            
+            # Traduz usando deep-translator
+            traducao = GoogleTranslator(source='en', target='pt').translate(texto)
+            
+            # Armazena em cache por 30 dias
+            cache.set(cache_key, traducao, 3600 * 24 * 30)
+            logger.info(f"[TRADUÇÃO] Texto traduzido com sucesso")
+            return traducao
+        except Exception as e:
+            logger.warning(f"[TRADUÇÃO] Erro ao traduzir: {str(e)}")
+            return texto  # Retorna original se falhar
+    
+    @staticmethod
     def get_anime_by_id(anime_id):
         """
         Busca anime completo por ID com cache
@@ -57,10 +91,16 @@ class JikanAPI:
         data = JikanAPI._make_request(f"/anime/{anime_id}/full")
         
         if data.get('data'):
+            anime_data = data['data']
+            
+            # Traduz a sinopse se disponível
+            if anime_data.get('synopsis'):
+                anime_data['synopsis'] = JikanAPI._traduzir_texto(anime_data['synopsis'])
+            
             # Armazena em cache
-            cache.set(cache_key, data['data'], JikanAPI.CACHE_TTL)
+            cache.set(cache_key, anime_data, JikanAPI.CACHE_TTL)
             logger.info(f"[SUCCESS] anime_id={anime_id}")
-            return data['data']
+            return anime_data
         
         logger.warning(f"[WARNING] anime_id={anime_id} not found")
         return None

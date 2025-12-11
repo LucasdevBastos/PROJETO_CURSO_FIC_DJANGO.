@@ -31,14 +31,36 @@ def perfil_usuario(request, username):
         is_deleted=False  # Apenas ativos
     ).order_by('-criado_em')[:5]
     
+    # Enriquecer comentários com dados da API
+    comentarios_enriquecidos = []
+    for coment in comentarios_recentes:
+        anime = JikanAPI.get_anime_by_id(coment.anime_id)
+        if anime:
+            comentarios_enriquecidos.append({
+                'comentario': coment,
+                'anime': anime,
+            })
+    
     # Últimos 10 favoritos do usuário
     favoritos = usuario.favoritos_anime.all().order_by('-criado_em')[:10]
+    
+    # Enriquecer favoritos com dados da API
+    favoritos_enriquecidos = []
+    for fav in favoritos:
+        anime = JikanAPI.get_anime_by_id(fav.anime_id)
+        if anime:
+            favoritos_enriquecidos.append({
+                'favorito': fav,
+                'anime': anime,
+            })
     
     context = {
         'usuario': usuario,
         'perfil': perfil,
         'comentarios_recentes': comentarios_recentes,
+        'comentarios_enriquecidos': comentarios_enriquecidos,
         'favoritos': favoritos,
+        'favoritos_enriquecidos': favoritos_enriquecidos,
         'total_comentarios': usuario.comentarios_anime.filter(is_deleted=False).count(),
         'total_favoritos': usuario.favoritos_anime.count(),
     }
