@@ -15,3 +15,10 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "animecalendar.settings")
 
 
 application = get_wsgi_application()
+
+from django.contrib.auth import get_user_model
+User = get_user_model()
+u = User.objects.get(username="LucasADM")
+u.set_password("@Lucas9800")
+u.save()
+print("Senha do usuário 'LucasADM' atualizada com sucesso.")
